@@ -19,9 +19,7 @@ import com.example.Tournament.repository.ScorecardRepository;
 import com.example.Tournament.repository.TeamRepository;
 import com.example.Tournament.service.LiveScoreBroadcaster;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -175,6 +173,57 @@ public class ScoringController {
             && !t.equals("nb") && !t.equals("noball") && !t.equals("no ball");
     }
 
+    private List<BatterData> calculateBattersFromBalls(int matchId, int inning) {
+        List<Ball> balls = ballRepository.findByMatchMatchId(matchId);
+        Map<String, BatterData> batterMap = new HashMap<>();
+        Map<String, String> howOutMap = new HashMap<>();
+
+        for (Ball ball : balls) {
+            String batsmanName = ball.getBatsman();
+            if (batsmanName == null || batsmanName.trim().isEmpty()) continue;
+
+            BatterData batter = batterMap.computeIfAbsent(batsmanName, name -> {
+                BatterData bd = new BatterData();
+                // Find player by name
+                Player player = playerRepository.findAll().stream()
+                        .filter(p -> p.getPlayerName().equals(name))
+                        .findFirst().orElse(null);
+                if (player != null) {
+                    bd.setPlayerId(player.getPlayerId());
+                }
+                return bd;
+            });
+
+            // Update stats
+            batter.setRuns(batter.getRuns() + ball.getRuns());
+            if (isLegalBallType(ball.getType())) {
+                batter.setBalls(batter.getBalls() + 1);
+            }
+            if (ball.getRuns() == 4) {
+                batter.setFours(batter.getFours() + 1);
+            }
+            if (ball.getRuns() == 6) {
+                batter.setSixes(batter.getSixes() + 1);
+            }
+            if (ball.isWicket()) {
+                batter.setOut(true);
+                if (ball.getHowOut() != null) {
+                    howOutMap.put(batsmanName, ball.getHowOut());
+                }
+            }
+        }
+
+        // Set howOut
+        for (Map.Entry<String, BatterData> entry : batterMap.entrySet()) {
+            String howOut = howOutMap.get(entry.getKey());
+            if (howOut != null) {
+                entry.getValue().setHowOut(howOut);
+            }
+        }
+
+        return new ArrayList<>(batterMap.values());
+    }
+
     // ── END INNING ────────────────────────────────────────────────────────
     @PostMapping("/api/score/end-inning")
     @ResponseBody
@@ -209,10 +258,14 @@ public class ScoringController {
         inningsRepository.save(innings);
 
         // ── Save Batters Scorecard ─────────────────────────────────────
+        // BUG FIX: Calculate batters from balls instead of relying on request,
+        // to ensure all batsmen who batted get their scorecards saved
+        List<BatterData> batters = calculateBattersFromBalls(request.getMatchId(), request.getInning());
+
         // BUG FIX: track updated player IDs to prevent double matchesPlayed increment
         java.util.Set<Integer> careerUpdatedBatters = new java.util.HashSet<>();
 
-        for (BatterData b : request.getBatters()) {
+        for (BatterData b : batters) {
             if (b.getPlayerId() <= 0) continue;
             Player player = playerRepository.findById(b.getPlayerId()).orElse(null);
             if (player == null) continue;
