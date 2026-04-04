@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netyakhedi Cricket Tournament 2026</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta name="description" content="Live cricket tournament scoring, teams, players and match updates of Netyakhedi Premier League 2026">
+    <meta name="keywords" content="Netyakhedi tournament, cricket live score, village cricket, NPL 2026">
+    <meta name="google-site-verification" content="8LJZPlNGqZ7DXK2P3NHjvN9WyjlpqQfW6YEDhqak1rk" />
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Stats bar */
+        .stats-bar {
+            background: rgba(0,0,0,0.25);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 12px 20px;
+        }
+        .stats-bar-inner {
+            max-width: 1200px; margin: 0 auto;
+            display: flex; gap: 32px; align-items: center;
+            flex-wrap: wrap;
+        }
+        .stat-chip {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 14px; color: rgba(255,255,255,0.75);
+        }
+        .stat-chip strong {
+            color: #00ffcc; font-size: 18px; font-weight: 700;
+        }
+        .live-dot {
+            display: inline-block; width: 8px; height: 8px;
+            background: #ff416c; border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Match card link wrapper */
+        .match-card-link {
+            text-decoration: none; color: inherit; display: block;
+        }
+        .match-card-link:hover .match-card {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,255,204,0.2);
+            border-color: rgba(0,255,204,0.3);
+        }
+        .match-card { cursor: pointer; }
+
+        /* Btn watch variants */
+        .btn-watch-live {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+        }
+        .btn-watch-done {
+            background: linear-gradient(45deg, #56ab2f, #a8e063);
+        }
+        .btn-watch-upcoming {
+            background: linear-gradient(45deg, #f7971e, #ffd200);
+            color: black !important;
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="nav-container">
+        <h2 class="logo">🏏 CricketPro</h2>
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <span></span><span></span><span></span>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="/" class="active">Home</a></li>
+            <li><a href="/tournaments">Tournaments</a></li>
+            <li><a href="/matches">Matches</a></li>
+            <li><a href="/teams">Teams</a></li>
+            <li><a href="/players">Players</a></li>
+            <li><a href="/login" class="btn-login">Login</a></li>
+            <li><a href="/signup" class="btn-signup" style="pointer-events: none; opacity: 0.5;">Signup</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- STATS BAR (only if data exists) -->
+<div class="stats-bar">
+    <div class="stats-bar-inner">
+        <div class="stat-chip">
+            🏏 <strong th:text="${teamCount}">0</strong> Teams
+        </div>
+        <div class="stat-chip">
+            👤 <strong th:text="${playerCount}">0</strong> Players
+        </div>
+        <div class="stat-chip">
+            📅 <strong th:text="${matches.size()}">0</strong> Matches
+        </div>
+        <div class="stat-chip" th:if="${liveCount > 0}">
+            <span class="live-dot"></span>
+            <strong th:text="${liveCount}">0</strong> Live Now
+        </div>
+    </div>
+</div>
+
+<!-- HERO SECTION -->
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="fade-in">Welcome to CricketPro Tournament</h1>
+        <p class="fade-in-delay">Live Scores • Real-time Updates • Professional Cricket</p>
+        <div class="hero-buttons fade-in-delay-2">
+            <a href="/matches" class="btn-primary">View All Matches</a>
+            <a href="/teams" class="btn-secondary">View Teams</a>
+        </div>
+    </div>
+</section>
+
+<!-- LIVE & UPCOMING MATCHES -->
+<section class="matches-section" id="matches">
+    <div class="container">
+        <h2 class="section-title">Live &amp; Upcoming Matches</h2>
+
+        <!-- No matches -->
+        <div class="matches-grid" th:if="${#lists.isEmpty(matches)}">
+            <div class="no-matches">
+                <div class="icon">🏏</div>
+                <h3>No Matches Scheduled</h3>
+                <p>Check back later for upcoming matches!</p>
+            </div>
+        </div>
+
+        <!-- Match cards -->
+        <div class="matches-grid" th:unless="${#lists.isEmpty(matches)}">
+            <a th:each="match : ${matches}"
+               th:href="@{'/match/' + ${match.matchId}}"
+               class="match-card-link">
+                <div class="match-card"
+                     th:classappend="${match.status == 'Live'} ? 'live-match' : (${match.status == 'Completed'} ? 'completed-match' : 'upcoming-match')">
+
+                    <div class="match-header">
+                        <span class="match-type" th:text="${match.overs} + ' Overs'"></span>
+                        <span class="match-status"
+                              th:classappend="${match.status == 'Live'} ? 'status-live' : (${match.status == 'Completed'} ? 'status-completed' : 'status-upcoming')"
+                              th:text="${match.status}">
+                        </span>
+                    </div>
+
+                    <div class="teams-container">
+                        <div class="team team1">
+                            <div class="team-icon">🏏</div>
+                            <h3 th:text="${match.team1 != null ? match.team1.teamName : 'Team 1'}"></h3>
+                            <p class="team-info" th:text="${match.team1 != null ? match.team1.captainName : ''}"></p>
+                        </div>
+                        <div class="vs-divider">VS</div>
+                        <div class="team team2">
+                            <div class="team-icon">🏏</div>
+                            <h3 th:text="${match.team2 != null ? match.team2.teamName : 'Team 2'}"></h3>
+                            <p class="team-info" th:text="${match.team2 != null ? match.team2.captainName : ''}"></p>
+                        </div>
+                    </div>
+
+                    <div class="match-footer">
+                        <div class="venue">
+                            <span class="icon">📍</span>
+                            <span th:text="${match.venue != null ? match.venue : 'TBA'}"></span>
+                        </div>
+                        <div class="datetime">
+                            <span class="icon">📅</span>
+                            <span th:text="${match.matchDate != null ? match.matchDate : 'TBA'}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Winner line for completed -->
+                    <div th:if="${match.status == 'Completed' and match.matchWinner != null}"
+                         style="margin-top:12px; padding:8px 0; border-top:1px solid rgba(255,255,255,0.1); text-align:center; font-size:13px; color:#a8e063; font-weight:600;">
+                        🏆 <span th:text="${match.matchWinner.teamName}"></span> won
+                    </div>
+
+                    <div class="match-actions">
+                        <span class="btn-watch"
+                              th:classappend="${match.status == 'Live'} ? 'btn-watch-live' : (${match.status == 'Completed'} ? 'btn-watch-done' : 'btn-watch-upcoming')"
+                              th:text="${match.status == 'Live'} ? '🔴 Watch Live' : (${match.status == 'Completed'} ? '📊 View Scorecard' : '📅 Match Info')">
+                        </span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- See all link -->
+        <div style="text-align:center; margin-top:30px;" th:if="${matches.size() > 0}">
+            <a href="/matches" style="color:#00ffcc; text-decoration:none; font-weight:600; font-size:15px;">
+                View All Matches →
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="container">
+        <p>&copy; 2026 CricketPro. All rights reserved.</p>
+        <div style="display:flex; gap:16px;">
+            <a href="/matches" style="color:rgba(255,255,255,0.7); text-decoration:none; font-size:14px;">Matches</a>
+            <a href="/teams" style="color:rgba(255,255,255,0.7); text-decoration:none; font-size:14px;">Teams</a>
+            <a href="/players" style="color:rgba(255,255,255,0.7); text-decoration:none; font-size:14px;">Players</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+function toggleMenu() {
+    document.getElementById("navLinks").classList.toggle("active");
+}
+</script>
+</body>
+</html>

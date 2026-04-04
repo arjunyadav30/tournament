@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Matches - CricketPro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #060d14; --surface: #0d1b2a; --card: #111f30; --border: #1e3a5f;
+            --accent: #00e5ff; --green: #00e676; --red: #ff1744; --yellow: #ffd740;
+            --text: #e8f4fd; --muted: #6b8fa8;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; }
+        nav { background:rgba(13,27,42,0.97); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; padding:0 24px; }
+        .nav-inner { max-width:1100px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; height:60px; }
+        .logo { font-family:'Rajdhani',sans-serif; font-size:22px; font-weight:700; color:var(--accent); text-decoration:none; letter-spacing:1px; }
+        .nav-links { display:flex; gap:24px; list-style:none; }
+        .nav-links a { color:var(--muted); text-decoration:none; font-size:14px; font-weight:500; transition:color .2s; }
+        .nav-links a:hover,.nav-links a.active { color:var(--accent); }
+        .menu-toggle { display:none; flex-direction:column; gap:5px; cursor:pointer; }
+        .menu-toggle span { width:24px; height:2px; background:var(--muted); border-radius:2px; }
+        .page-header { background:linear-gradient(135deg,#0d1b2a,#060d14); border-bottom:1px solid var(--border); padding:36px 24px; text-align:center; }
+        .page-header h1 { font-family:'Rajdhani',sans-serif; font-size:36px; font-weight:700; }
+        .page-header p { color:var(--muted); font-size:15px; margin-top:6px; }
+        .filter-row { display:flex; gap:8px; justify-content:center; padding:24px 24px 0; flex-wrap:wrap; }
+        .filter-btn { padding:7px 18px; border-radius:20px; border:1px solid var(--border); background:var(--surface); color:var(--muted); font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; font-family:'Inter',sans-serif; }
+        .filter-btn:hover,.filter-btn.active { border-color:var(--accent); color:var(--accent); }
+        .filter-btn.live-btn.active { border-color:var(--red); color:var(--red); }
+        .main { max-width:1100px; margin:0 auto; padding:24px; }
+        .matches-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; }
+        .match-card { background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; transition:transform .2s,border-color .2s; text-decoration:none; color:inherit; display:block; }
+        .match-card:hover { transform:translateY(-3px); border-color:var(--accent); }
+        .match-card.live-card { border-color:rgba(255,23,68,0.4); }
+        .match-card.live-card:hover { border-color:var(--red); }
+        .card-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--border); background:rgba(255,255,255,0.02); }
+        .overs-tag { font-size:12px; font-weight:600; color:var(--muted); letter-spacing:1px; }
+        .status-pill { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
+        .pill-live { background:rgba(255,23,68,.15); color:var(--red); border:1px solid rgba(255,23,68,.3); }
+        .pill-live .dot { width:6px; height:6px; border-radius:50%; background:var(--red); animation:pulse 1.2s ease-in-out infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+        .pill-completed { background:rgba(0,230,118,.12); color:var(--green); border:1px solid rgba(0,230,118,.3); }
+        .pill-upcoming { background:rgba(255,215,64,.1); color:var(--yellow); border:1px solid rgba(255,215,64,.3); }
+        .card-teams { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; padding:20px 16px; }
+        .team-col.right { text-align:right; }
+        .team-label { font-size:11px; color:var(--muted); font-weight:500; margin-bottom:4px; }
+        .team-n { font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:700; line-height:1.1; }
+        .vs-mini { font-family:'Rajdhani',sans-serif; font-size:14px; font-weight:600; color:var(--muted); text-align:center; }
+        .card-footer { padding:10px 16px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; }
+        .meta-chip { font-size:12px; color:var(--muted); }
+        .result-line { background:rgba(0,230,118,.07); border-top:1px solid rgba(0,230,118,.15); padding:8px 16px; font-size:12px; color:var(--green); font-weight:600; text-align:center; }
+        .live-action { background:rgba(255,23,68,.07); border-top:1px solid rgba(255,23,68,.15); padding:10px 16px; text-align:center; font-size:13px; color:var(--red); font-weight:600; }
+        .empty-state { text-align:center; padding:80px 20px; grid-column:1/-1; color:var(--muted); }
+        .empty-state .big { font-size:48px; margin-bottom:12px; }
+        .empty-state h3 { font-size:20px; margin-bottom:6px; color:var(--text); }
+        footer { border-top:1px solid var(--border); padding:24px; text-align:center; color:var(--muted); font-size:13px; margin-top:40px; }
+        @media(max-width:600px) { .nav-links{display:none;} .nav-links.open{display:flex;flex-direction:column;position:absolute;top:60px;left:0;right:0;background:var(--surface);padding:16px;border-bottom:1px solid var(--border);} .menu-toggle{display:flex;} .matches-grid{grid-template-columns:1fr;} }
+    </style>
+</head>
+<body>
+<nav>
+    <div class="nav-inner">
+        <a href="/" class="logo">🏏 CricketPro</a>
+        <div class="menu-toggle" onclick="document.getElementById('navLinks').classList.toggle('open')">
+            <span></span><span></span><span></span>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="/">Home</a></li>
+            <li><a href="/teams">Teams</a></li>
+            <li><a href="/players">Players</a></li>
+            <li><a href="/matches" class="active">Matches</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="page-header">
+    <h1>All Matches</h1>
+    <p>Click any match to view live score or full scorecard</p>
+</div>
+
+<div class="filter-row">
+    <button class="filter-btn active" onclick="filterMatches('all',this)">All</button>
+    <button class="filter-btn live-btn" onclick="filterMatches('Live',this)">🔴 Live</button>
+    <button class="filter-btn" onclick="filterMatches('Upcoming',this)">Upcoming</button>
+    <button class="filter-btn" onclick="filterMatches('Completed',this)">Completed</button>
+</div>
+
+<div class="main">
+    <div class="matches-grid" id="matchesGrid">
+
+        <div th:if="${#lists.isEmpty(matches)}" class="empty-state">
+            <div class="big">🏏</div>
+            <h3>No Matches Yet</h3>
+            <p>Check back soon for scheduled matches!</p>
+        </div>
+
+        <a th:unless="${#lists.isEmpty(matches)}"
+           th:each="match : ${matches}"
+           th:href="@{'/match/' + ${match.matchId}}"
+           class="match-card"
+           th:classappend="${match.status == 'Live'} ? ' live-card' : ''"
+           th:attr="data-status=${match.status}">
+
+            <div class="card-header">
+                <span class="overs-tag" th:text="${match.overs} + ' OVERS'"></span>
+                <span class="status-pill"
+                      th:classappend="${match.status == 'Live'} ? 'pill-live' : (${match.status == 'Completed'} ? 'pill-completed' : 'pill-upcoming')">
+                    <span class="dot" th:if="${match.status == 'Live'}"></span>
+                    <span th:text="${match.status}"></span>
+                </span>
+            </div>
+
+            <div class="card-teams">
+                <div class="team-col">
+                    <div class="team-label">Team 1</div>
+                    <div class="team-n" th:text="${match.team1 != null ? match.team1.teamName : 'TBD'}"></div>
+                </div>
+                <div class="vs-mini">VS</div>
+                <div class="team-col right">
+                    <div class="team-label" style="text-align:right">Team 2</div>
+                    <div class="team-n" th:text="${match.team2 != null ? match.team2.teamName : 'TBD'}"></div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <span class="meta-chip" th:text="${match.venue != null ? '📍 ' + match.venue : '📍 TBA'}"></span>
+                <span class="meta-chip" th:text="${match.matchDate != null ? '📅 ' + match.matchDate : ''}"></span>
+            </div>
+
+            <div class="result-line"
+                 th:if="${match.status == 'Completed' and match.matchWinner != null}"
+                 th:text="'🏆 ' + ${match.matchWinner.teamName} + ' won'">
+            </div>
+            <div class="result-line"
+                 th:if="${match.status == 'Completed' and match.matchWinner == null}"
+                 style="color:var(--yellow);background:rgba(255,215,64,0.06)">
+                🤝 Match Tied
+            </div>
+            <div class="live-action" th:if="${match.status == 'Live'}">
+                🔴 Watch Live Score →
+            </div>
+        </a>
+    </div>
+</div>
+
+<footer>&copy; 2026 CricketPro. All rights reserved.</footer>
+
+<script>
+function filterMatches(status, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.match-card[data-status]').forEach(card => {
+        card.style.display = (status === 'all' || card.dataset.status === status) ? '' : 'none';
+    });
+}
+</script>
+</body>
+</html>

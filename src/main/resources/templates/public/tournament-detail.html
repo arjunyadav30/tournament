@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${tournament.tournamentName} + ' | CricketPro Admin'">Tournament Detail</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep:    #08111a;
+            --bg-card:    rgba(255,255,255,0.04);
+            --bg-card-hv: rgba(0,255,180,0.05);
+            --accent:     #00ffb4;
+            --accent2:    #00c8ff;
+            --red:        #ff4f6d;
+            --border:     rgba(255,255,255,0.08);
+            --border-acc: rgba(0,255,180,0.25);
+            --text:       #e8f0ec;
+            --muted:      rgba(255,255,255,0.45);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg-deep);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            background-image:
+                radial-gradient(ellipse 60% 40% at 80% 0%, rgba(0,200,120,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 30% at 10% 90%, rgba(0,150,255,0.06) 0%, transparent 60%);
+        }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            background: rgba(8,17,26,0.9) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.65rem 0;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .navbar-brand {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800; font-size: 18px;
+            color: var(--accent) !important;
+        }
+        .nav-link {
+            color: var(--muted) !important;
+            font-weight: 500; font-size: 14px;
+            padding: 6px 14px !important;
+            border-radius: 8px; transition: all 0.18s;
+        }
+        .nav-link:hover { color: var(--text) !important; background: rgba(255,255,255,0.05); }
+        .nav-link.active { color: var(--accent) !important; }
+        .nav-link.text-danger { color: #ff4f6d !important; }
+        .navbar-toggler { border: 1px solid var(--border-acc) !important; padding: 5px 9px; border-radius: 8px; }
+        .navbar-toggler:focus { box-shadow: none !important; }
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(0,255,180,0.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+        }
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                background: rgba(8,17,26,0.97);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 12px; margin-top: 8px;
+            }
+            .nav-link { display: block; padding: 10px 14px !important; }
+        }
+
+        /* ── LAYOUT ── */
+        .page-wrapper { padding: 20px 16px 60px; max-width: 960px; margin: 0 auto; }
+
+        /* ── BACK BUTTON ── */
+        .btn-back {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--muted); font-size: 13px; font-weight: 500;
+            text-decoration: none; margin-bottom: 16px;
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-card);
+            transition: all 0.15s;
+        }
+        .btn-back:hover { color: var(--text); border-color: var(--border-acc); }
+
+        /* ── HERO CARD ── */
+        .hero-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px 22px;
+            margin-bottom: 16px;
+            animation: fadeUp 0.3s ease both;
+        }
+        .hero-top {
+            display: flex; align-items: flex-start;
+            justify-content: space-between; gap: 12px;
+            margin-bottom: 16px;
+        }
+        .hero-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(20px, 5vw, 28px);
+            font-weight: 800; color: #fff;
+            line-height: 1.2;
+        }
+        .hero-meta {
+            display: flex; flex-wrap: wrap; gap: 12px 20px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+        .meta-chip {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 13px; color: var(--muted);
+        }
+        .meta-chip span { color: var(--text); font-weight: 500; }
+
+        /* ── STATUS BADGE ── */
+        .badge-status {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 13px; border-radius: 20px;
+            font-size: 12px; font-weight: 600;
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .badge-status::before {
+            content: ''; width: 6px; height: 6px;
+            border-radius: 50%; display: inline-block;
+        }
+        .badge-upcoming  { background: rgba(255,210,0,0.12); color: #ffd200; border: 1px solid rgba(255,210,0,0.3); }
+        .badge-upcoming::before  { background: #ffd200; }
+        .badge-ongoing   { background: rgba(255,79,109,0.12); color: #ff4f6d; border: 1px solid rgba(255,79,109,0.3); }
+        .badge-ongoing::before   { background: #ff4f6d; box-shadow: 0 0 5px #ff4f6d; animation: pulse 1.4s infinite; }
+        .badge-completed { background: rgba(0,255,180,0.1); color: var(--accent); border: 1px solid var(--border-acc); }
+        .badge-completed::before { background: var(--accent); }
+        @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+
+        /* ── STAT GRID ── */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        @media (min-width: 480px) { .stat-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        @media (min-width: 760px) { .category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (min-width: 1120px) { .category-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+        .category-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 20px;
+            transition: transform 0.18s, border-color 0.18s, background 0.18s;
+        }
+        .category-card:hover { transform: translateY(-2px); border-color: rgba(255,210,0,0.3); background: rgba(255,210,0,0.04); }
+
+        .category-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .category-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #fff; }
+        .category-value { font-size: 28px; font-weight: 800; color: #ffd200; }
+        .category-subtitle { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+        .rank-list { display: grid; gap: 10px; }
+        .rank-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 12px;
+            align-items: center;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.03);
+            transition: background 0.15s;
+        }
+        .rank-item:hover { background: rgba(255,255,255,0.08); }
+        .rank-item.first { background: linear-gradient(180deg, rgba(255,210,0,0.16), rgba(255,255,255,0.04)); border: 1px solid rgba(255,210,0,0.25); }
+        .rank-badge {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.08);
+            color: #ffd200;
+            font-weight: 700;
+        }
+        .rank-item.first .rank-badge { background: #ffd200; color: #08111a; box-shadow: 0 0 12px rgba(255,210,0,0.25); }
+        .rank-player { font-size: 14px; font-weight: 700; color: #fff; }
+        .rank-team { font-size: 12px; color: var(--muted); }
+        .rank-value { font-size: 14px; font-weight: 800; color: var(--accent); text-align: right; white-space: nowrap; }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 14px;
+            text-align: center;
+            animation: fadeUp 0.3s ease both;
+        }
+        .stat-num {
+            font-family: 'Syne', sans-serif;
+            font-size: 28px; font-weight: 800;
+            color: var(--accent);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+        .stat-label { font-size: 12px; color: var(--muted); font-weight: 500; }
+
+        /* ── SECTION HEADER ── */
+        .section-header {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px; margin-top: 24px;
+        }
+        .section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 15px; font-weight: 700; color: #fff;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-count {
+            font-size: 12px; color: var(--muted);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px; padding: 2px 10px;
+        }
+
+        /* ── TEAMS LIST ── */
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 10px;
+        }
+        .team-chip {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex; align-items: center; gap: 10px;
+            transition: border-color 0.15s, background 0.15s;
+            animation: fadeUp 0.3s ease both;
+        }
+        .team-chip:hover { border-color: var(--border-acc); background: var(--bg-card-hv); }
+        .team-avatar {
+            width: 34px; height: 34px; border-radius: 10px;
+            background: linear-gradient(135deg, rgba(0,255,180,0.2), rgba(0,200,255,0.2));
+            border: 1px solid var(--border-acc);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 700; color: var(--accent);
+            font-family: 'Syne', sans-serif;
+            flex-shrink: 0;
+        }
+        .team-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
+        .team-sub  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+        /* ── MATCHES LIST ── */
+        .matches-list { display: flex; flex-direction: column; gap: 8px; }
+        .match-row {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            display: flex; align-items: center;
+            justify-content: space-between; gap: 12px;
+            transition: border-color 0.15s, background 0.15s;
+            animation: fadeUp 0.3s ease both;
+        }
+        .match-row:hover { border-color: var(--border-acc); background: var(--bg-card-hv); }
+        .match-teams {
+            font-size: 14px; font-weight: 600; color: #fff;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .match-vs {
+            font-size: 11px; color: var(--muted);
+            font-weight: 400; padding: 1px 6px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 4px;
+        }
+        .match-meta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+        .match-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+        /* ── ACTIONS ── */
+        .action-row {
+            display: flex; gap: 10px; flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .btn-accent {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none; color: #08111a;
+            font-family: 'Syne', sans-serif; font-weight: 700;
+            font-size: 13px; padding: 10px 20px; border-radius: 10px;
+            text-decoration: none; transition: opacity 0.15s, transform 0.15s;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .btn-accent:hover { opacity: 0.88; transform: translateY(-1px); color: #08111a; }
+        .btn-ghost {
+            background: rgba(0,255,180,0.07);
+            border: 1px solid var(--border-acc);
+            color: var(--accent); font-size: 13px; font-weight: 600;
+            padding: 10px 18px; border-radius: 10px;
+            text-decoration: none; transition: background 0.15s;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .btn-ghost:hover { background: rgba(0,255,180,0.12); color: var(--accent); }
+        .btn-danger-soft {
+            background: rgba(255,79,109,0.08);
+            border: 1px solid rgba(255,79,109,0.25);
+            color: #ff4f6d; font-size: 13px; font-weight: 600;
+            padding: 10px 18px; border-radius: 10px;
+            text-decoration: none; transition: background 0.15s;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .btn-danger-soft:hover { background: rgba(255,79,109,0.14); color: #ff4f6d; }
+
+        /* ── EMPTY STATE ── */
+        .empty-mini {
+            text-align: center; padding: 28px 16px;
+            color: var(--muted); font-size: 13px;
+        }
+        .empty-mini span { font-size: 28px; display: block; margin-bottom: 8px; }
+
+        /* ── ANIMATION ── */
+        @keyframes fadeUp {
+            from { opacity:0; transform: translateY(8px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container-fluid px-3">
+        <a class="navbar-brand" href="/">🏏 CricketPro</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="/tournaments">Tournaments</a></li>
+                <li class="nav-item"><a class="nav-link" href="/matches">Matches</a></li>
+                <li class="nav-item"><a class="nav-link" href="/teams">Teams</a></li>
+                <li class="nav-item"><a class="nav-link" href="/players">Players</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/login">Admin</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<div class="page-wrapper">
+
+    <!-- Back -->
+    <a href="/tournaments" class="btn-back">← Back to Tournaments</a>
+
+    <!-- Hero Card -->
+    <div class="hero-card">
+        <div class="hero-top">
+            <div>
+                <div style="font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;"
+                     th:text="'Tournament #' + ${tournament.tournamentId}">#1</div>
+                <div class="hero-title" th:text="${tournament.tournamentName}">Tournament Name</div>
+            </div>
+            <span class="badge-status"
+                  th:classappend="${tournament.status == 'Upcoming'} ? 'badge-upcoming' : (${tournament.status == 'Ongoing'} ? 'badge-ongoing' : 'badge-completed')"
+                  th:text="${tournament.status}">Upcoming</span>
+        </div>
+        <div class="hero-meta">
+            <div class="meta-chip">
+                📅 Start: <span th:text="${tournament.startDate != null ? tournament.startDate : '—'}">—</span>
+            </div>
+            <div class="meta-chip">
+                🏁 End: <span th:text="${tournament.endDate != null ? tournament.endDate : '—'}">—</span>
+            </div>
+            <div class="meta-chip" th:if="${tournament.location != null}">
+                📍 <span th:text="${tournament.location}">—</span>
+            </div>
+            <div class="meta-chip" th:if="${tournament.organizer != null}">
+                🏢 <span th:text="${tournament.organizer}">—</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tournament Statistics -->
+    <div class="section-header">
+        <div class="section-title">📊 Tournament Statistics</div>
+        <span class="section-count" th:text="${matches.size()} + ' matches'">0 matches</span>
+    </div>
+
+    <div class="category-grid">
+        <div class="category-card">
+            <div class="category-title">
+                <div>
+                    <div class="category-name">Most Runs</div>
+                    <div class="category-subtitle">Top run-scorers in this tournament</div>
+                </div>
+                <div class="category-value" th:text="${statsMostRuns.size() > 0 ? statsMostRuns[0].value : '—'}">0</div>
+            </div>
+            <div class="rank-list">
+                <div class="rank-item" th:each="stat,iter : ${statsMostRuns}" th:classappend="${iter.index == 0} ? ' first'">
+                    <div class="rank-badge" th:text="${iter.index + 1}">1</div>
+                    <div>
+                        <div class="rank-player" th:text="${stat.playerName}">Player</div>
+                        <div class="rank-team" th:text="${stat.teamName}">Team</div>
+                    </div>
+                    <div class="rank-value" th:text="${stat.value}">0</div>
+                </div>
+                <div class="empty-mini" th:if="${statsMostRuns.empty}"><span>📊</span>No batting stats available</div>
+            </div>
+        </div>
+
+        <div class="category-card">
+            <div class="category-title">
+                <div>
+                    <div class="category-name">Most Wickets</div>
+                    <div class="category-subtitle">Top wicket-takers</div>
+                </div>
+                <div class="category-value" th:text="${statsMostWickets.size() > 0 ? statsMostWickets[0].value : '—'}">0</div>
+            </div>
+            <div class="rank-list">
+                <div class="rank-item" th:each="stat,iter : ${statsMostWickets}" th:classappend="${iter.index == 0} ? ' first'">
+                    <div class="rank-badge" th:text="${iter.index + 1}">1</div>
+                    <div>
+                        <div class="rank-player" th:text="${stat.playerName}">Player</div>
+                        <div class="rank-team" th:text="${stat.teamName}">Team</div>
+                    </div>
+                    <div class="rank-value" th:text="${stat.value}">0</div>
+                </div>
+                <div class="empty-mini" th:if="${statsMostWickets.empty}"><span>🎯</span>No bowling stats available</div>
+            </div>
+        </div>
+
+        <div class="category-card">
+            <div class="category-title">
+                <div>
+                    <div class="category-name">Highest Score</div>
+                    <div class="category-subtitle">Best single innings score</div>
+                </div>
+                <div class="category-value" th:text="${statsHighestScore.size() > 0 ? statsHighestScore[0].value : '—'}">0</div>
+            </div>
+            <div class="rank-list">
+                <div class="rank-item" th:each="stat,iter : ${statsHighestScore}" th:classappend="${iter.index == 0} ? ' first'">
+                    <div class="rank-badge" th:text="${iter.index + 1}">1</div>
+                    <div>
+                        <div class="rank-player" th:text="${stat.playerName}">Player</div>
+                        <div class="rank-team" th:text="${stat.teamName}">Team</div>
+                    </div>
+                    <div class="rank-value" th:text="${stat.value}">0</div>
+                </div>
+                <div class="empty-mini" th:if="${statsHighestScore.empty}"><span>💥</span>No records yet</div>
+            </div>
+        </div>
+
+        <div class="category-card">
+            <div class="category-title">
+                <div>
+                    <div class="category-name">Best Bowling</div>
+                    <div class="category-subtitle">Top innings bowling figure</div>
+                </div>
+                <div class="category-value" th:text="${statsBestBowling.size() > 0 ? statsBestBowling[0].value : '—'}">0/0</div>
+            </div>
+            <div class="rank-list">
+                <div class="rank-item" th:each="stat,iter : ${statsBestBowling}" th:classappend="${iter.index == 0} ? ' first'">
+                    <div class="rank-badge" th:text="${iter.index + 1}">1</div>
+                    <div>
+                        <div class="rank-player" th:text="${stat.playerName}">Player</div>
+                        <div class="rank-team" th:text="${stat.teamName}">Team</div>
+                    </div>
+                    <div class="rank-value" th:text="${stat.value}">0/0</div>
+                </div>
+                <div class="empty-mini" th:if="${statsBestBowling.empty}"><span>🎯</span>No bowling figures recorded</div>
+            </div>
+        </div>
+
+        <div class="category-card">
+            <div class="category-title">
+                <div>
+                    <div class="category-name">Batting Average</div>
+                    <div class="category-subtitle">Runs per dismissal</div>
+                </div>
+                <div class="category-value" th:text="${statsBattingAverage.size() > 0 ? statsBattingAverage[0].value : '—'}">0.00</div>
+            </div>
+            <div class="rank-list">
+                <div class="rank-item" th:each="stat,iter : ${statsBattingAverage}" th:classappend="${iter.index == 0} ? ' first'">
+                    <div class="rank-badge" th:text="${iter.index + 1}">1</div>
+                    <div>
+                        <div class="rank-player" th:text="${stat.playerName}">Player</div>
+                        <div class="rank-team" th:text="${stat.teamName}">Team</div>
+                    </div>
+                    <div class="rank-value" th:text="${stat.value}">0.00</div>
+                </div>
+                <div class="empty-mini" th:if="${statsBattingAverage.empty}"><span>📈</span>No batting records yet</div>
+            </div>
+        </div>
+
+        <div class="category-card">
+            <div class="category-title">
+                <div>
+                    <div class="category-name">Bowling Average</div>
+                    <div class="category-subtitle">Runs conceded per wicket</div>
+                </div>
+                <div class="category-value" th:text="${statsBowlingAverage.size() > 0 ? statsBowlingAverage[0].value : '—'}">0.00</div>
+            </div>
+            <div class="rank-list">
+                <div class="rank-item" th:each="stat,iter : ${statsBowlingAverage}" th:classappend="${iter.index == 0} ? ' first'">
+                    <div class="rank-badge" th:text="${iter.index + 1}">1</div>
+                    <div>
+                        <div class="rank-player" th:text="${stat.playerName}">Player</div>
+                        <div class="rank-team" th:text="${stat.teamName}">Team</div>
+                    </div>
+                    <div class="rank-value" th:text="${stat.value}">0.00</div>
+                </div>
+                <div class="empty-mini" th:if="${statsBowlingAverage.empty}"><span>🎳</span>No bowling records yet</div>
+            </div>
+        </div>
+
+        <div class="category-card" th:if="${showHundredsSection}">
+            <div class="category-title">
+                <div>
+                    <div class="category-name">Most Hundreds</div>
+                    <div class="category-subtitle">Players with 100+ scores</div>
+                </div>
+                <div class="category-value" th:text="${statsMostHundreds.size() > 0 ? statsMostHundreds[0].value : '—'}">0</div>
+            </div>
+            <div class="rank-list">
+                <div class="rank-item" th:each="stat,iter : ${statsMostHundreds}" th:classappend="${iter.index == 0} ? ' first'">
+                    <div class="rank-badge" th:text="${iter.index + 1}">1</div>
+                    <div>
+                        <div class="rank-player" th:text="${stat.playerName}">Player</div>
+                        <div class="rank-team" th:text="${stat.teamName}">Team</div>
+                    </div>
+                    <div class="rank-value" th:text="${stat.value}">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-card">
+            <div class="category-title">
+                <div>
+                    <div class="category-name">Most Fifties</div>
+                    <div class="category-subtitle">Scores between 50 and 99</div>
+                </div>
+                <div class="category-value" th:text="${statsMostFifties.size() > 0 ? statsMostFifties[0].value : '—'}">0</div>
+            </div>
+            <div class="rank-list">
+                <div class="rank-item" th:each="stat,iter : ${statsMostFifties}" th:classappend="${iter.index == 0} ? ' first'">
+                    <div class="rank-badge" th:text="${iter.index + 1}">1</div>
+                    <div>
+                        <div class="rank-player" th:text="${stat.playerName}">Player</div>
+                        <div class="rank-team" th:text="${stat.teamName}">Team</div>
+                    </div>
+                    <div class="rank-value" th:text="${stat.value}">0</div>
+                </div>
+                <div class="empty-mini" th:if="${statsMostFifties.empty}"><span>✨</span>No fifty records yet</div>
+            </div>
+        </div>
+
+        <div class="category-card">
+            <div class="category-title">
+                <div>
+                    <div class="category-name">Most Sixes</div>
+                    <div class="category-subtitle">Big hitters in this tournament</div>
+                </div>
+                <div class="category-value" th:text="${statsMostSixes.size() > 0 ? statsMostSixes[0].value : '—'}">0</div>
+            </div>
+            <div class="rank-list">
+                <div class="rank-item" th:each="stat,iter : ${statsMostSixes}" th:classappend="${iter.index == 0} ? ' first'">
+                    <div class="rank-badge" th:text="${iter.index + 1}">1</div>
+                    <div>
+                        <div class="rank-player" th:text="${stat.playerName}">Player</div>
+                        <div class="rank-team" th:text="${stat.teamName}">Team</div>
+                    </div>
+                    <div class="rank-value" th:text="${stat.value}">0</div>
+                </div>
+                <div class="empty-mini" th:if="${statsMostSixes.empty}"><span>🎯</span>No sixes recorded</div>
+            </div>
+        </div>
+
+        <div class="category-card">
+            <div class="category-title">
+                <div>
+                    <div class="category-name">Most Fours</div>
+                    <div class="category-subtitle">Boundary-makers</div>
+                </div>
+                <div class="category-value" th:text="${statsMostFours.size() > 0 ? statsMostFours[0].value : '—'}">0</div>
+            </div>
+            <div class="rank-list">
+                <div class="rank-item" th:each="stat,iter : ${statsMostFours}" th:classappend="${iter.index == 0} ? ' first'">
+                    <div class="rank-badge" th:text="${iter.index + 1}">1</div>
+                    <div>
+                        <div class="rank-player" th:text="${stat.playerName}">Player</div>
+                        <div class="rank-team" th:text="${stat.teamName}">Team</div>
+                    </div>
+                    <div class="rank-value" th:text="${stat.value}">0</div>
+                </div>
+                <div class="empty-mini" th:if="${statsMostFours.empty}"><span>🎯</span>No boundary records yet</div>
+            </div>
+        </div>
+
+        <div class="category-card">
+            <div class="category-title">
+                <div>
+                    <div class="category-name">Most Boundaries</div>
+                    <div class="category-subtitle">Fours + Sixes</div>
+                </div>
+                <div class="category-value" th:text="${statsMostBoundaries.size() > 0 ? statsMostBoundaries[0].value : '—'}">0</div>
+            </div>
+            <div class="rank-list">
+                <div class="rank-item" th:each="stat,iter : ${statsMostBoundaries}" th:classappend="${iter.index == 0} ? ' first'">
+                    <div class="rank-badge" th:text="${iter.index + 1}">1</div>
+                    <div>
+                        <div class="rank-player" th:text="${stat.playerName}">Player</div>
+                        <div class="rank-team" th:text="${stat.teamName}">Team</div>
+                    </div>
+                    <div class="rank-value" th:text="${stat.value}">0</div>
+                </div>
+                <div class="empty-mini" th:if="${statsMostBoundaries.empty}"><span>🔥</span>No boundary data yet</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-grid">
+        <div class="stat-card" style="animation-delay:0.05s">
+            <div class="stat-num" th:text="${#lists.size(teams)}">0</div>
+            <div class="stat-label">Teams</div>
+        </div>
+        <div class="stat-card" style="animation-delay:0.1s">
+            <div class="stat-num" th:text="${#lists.size(matches)}">0</div>
+            <div class="stat-label">Total Matches</div>
+        </div>
+        <div class="stat-card" style="animation-delay:0.15s">
+            <div class="stat-num"
+                 th:text="${#lists.size(matches.?[status == 'Completed'])}">0</div>
+            <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card" style="animation-delay:0.2s">
+            <div class="stat-num"
+                 th:text="${#lists.size(matches.?[status == 'Upcoming'])}">0</div>
+            <div class="stat-label">Upcoming</div>
+        </div>
+    </div>
+
+    <!-- Action Buttons Removed - Public View Only -->
+
+    <!-- Teams Section -->
+    <div class="section-header">
+        <div class="section-title">👥 Teams</div>
+        <span class="section-count" th:text="${#lists.size(teams)} + ' teams'">0 teams</span>
+    </div>
+
+    <div th:if="${teams.empty}" class="empty-mini">
+        <span>👥</span>
+        No teams added yet
+    </div>
+
+    <div class="teams-grid" th:if="${teams != null and !teams.empty}">
+        <div class="team-chip" th:each="team : ${teams}">
+            <div class="team-avatar"
+                 th:text="${#strings.length(team.teamName) > 0 ? #strings.substring(team.teamName, 0, 2).toUpperCase() : 'T'}">
+                TC
+            </div>
+            <div>
+                <div class="team-name" th:text="${team.teamName}">Team Name</div>
+                <div class="team-sub" th:text="${team.village != null ? team.village : 'No location'}">Location</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Matches Section -->
+    <div class="section-header">
+        <div class="section-title">🏏 Matches</div>
+        <span class="section-count" th:text="${#lists.size(matches)} + ' matches'">0 matches</span>
+    </div>
+
+    <div th:if="${matches.empty}" class="empty-mini">
+        <span>🏏</span>
+        No matches scheduled yet
+    </div>
+
+    <div class="matches-list" th:if="${matches != null and !matches.empty}">
+        <div class="match-row" th:each="match : ${matches}">
+            <div>
+                <div class="match-teams">
+                    <span th:text="${match.team1 != null ? match.team1.teamName : 'TBD'}">Team A</span>
+                    <span class="match-vs">VS</span>
+                    <span th:text="${match.team2 != null ? match.team2.teamName : 'TBD'}">Team B</span>
+                </div>
+                <div class="match-meta">
+                    <span th:text="${match.matchDate != null ? match.matchDate : '—'}">—</span>
+                    <span th:if="${match.venue != null}"> · <span th:text="${match.venue}">Venue</span></span>
+                </div>
+            </div>
+            <div class="match-right">
+                <span class="badge-status"
+                      th:classappend="${match.status == 'Upcoming'} ? 'badge-upcoming' : (${match.status == 'Live'} ? 'badge-ongoing' : 'badge-completed')"
+                      th:text="${match.status != null ? match.status : 'Upcoming'}">Upcoming</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

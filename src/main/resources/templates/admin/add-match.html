@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Match | CricketPro Admin</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Poppins',sans-serif;
+        }
+
+        body{
+            min-height:100vh;
+            background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+            color:#fff;
+            padding:15px;
+        }
+
+        .container{
+            max-width:800px;
+            margin:0 auto;
+        }
+
+        .form-card{
+            background:rgba(255,255,255,0.06);
+            backdrop-filter:blur(18px);
+            border:1px solid rgba(255,255,255,0.08);
+            border-radius:22px;
+            padding:22px;
+            box-shadow:0 15px 40px rgba(0,0,0,0.35);
+        }
+
+        .title{
+            font-size:28px;
+            font-weight:700;
+            margin-bottom:20px;
+            color:#fff;
+            text-align:center;
+        }
+
+        .back-nav-btn{
+            display:inline-block;
+            background:rgba(255,255,255,0.1);
+            border:1px solid rgba(255,255,255,0.2);
+            color:white;
+            padding:10px 18px;
+            border-radius:12px;
+            text-decoration:none;
+            font-size:14px;
+            font-weight:500;
+            margin-bottom:16px;
+            transition:all 0.3s ease;
+            cursor:pointer;
+        }
+
+        .back-nav-btn:hover{
+            background:rgba(255,255,255,0.2);
+            border-color:#00ffcc;
+            color:#00ffcc;
+        }
+
+        .match-type-selector{
+            display:flex;
+            gap:12px;
+            margin-bottom:20px;
+        }
+
+        .match-type-btn{
+            flex:1;
+            padding:14px;
+            border:2px solid rgba(255,255,255,0.2);
+            background:rgba(255,255,255,0.05);
+            color:rgba(255,255,255,0.7);
+            border-radius:14px;
+            cursor:pointer;
+            font-weight:600;
+            transition:all 0.3s ease;
+            text-align:center;
+        }
+
+        .match-type-btn.active{
+            background:linear-gradient(45deg,#00ffcc,#00c3ff);
+            border-color:#00ffcc;
+            color:#000;
+            transform:translateY(-2px);
+            box-shadow:0 8px 20px rgba(0,255,204,0.3);
+        }
+
+        .tournament-select-box{
+            background:rgba(255,255,255,0.08);
+            border:1px solid rgba(255,255,255,0.15);
+            border-radius:16px;
+            padding:16px;
+            margin-bottom:18px;
+            display:none;
+        }
+
+        .tournament-select-box.show{
+            display:block;
+        }
+
+        .match-form{
+            display:grid;
+            grid-template-columns:1fr;
+            gap:14px;
+        }
+
+        .row{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:14px;
+        }
+
+        .field{
+            display:flex;
+            flex-direction:column;
+            gap:7px;
+        }
+
+        .field label{
+            font-size:13px;
+            font-weight:500;
+            color:rgba(255,255,255,0.8);
+            padding-left:4px;
+        }
+
+        input,
+        select{
+            width:100%;
+            border:none;
+            outline:none;
+            background:rgba(255,255,255,0.07);
+            border:1px solid rgba(255,255,255,0.12);
+            color:#fff;
+            border-radius:14px;
+            padding:13px 14px;
+            font-size:14px;
+            transition:0.25s;
+        }
+
+        input::placeholder{
+            color:rgba(255,255,255,0.45);
+        }
+
+        input:focus,
+        select:focus{
+            border-color:#00e6b8;
+            box-shadow:0 0 0 3px rgba(0,230,184,0.15);
+            background:rgba(255,255,255,0.1);
+        }
+
+        select{
+            background:#2b4350;
+            color:#fff;
+        }
+
+        select option{
+            background:#fff;
+            color:#111;
+        }
+
+        .team-section{
+            background:rgba(255,255,255,0.05);
+            border:1px solid rgba(255,255,255,0.08);
+            border-radius:18px;
+            padding:14px;
+            margin-top:4px;
+        }
+
+        .team-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:12px;
+        }
+
+        .team-header h3{
+            font-size:16px;
+            font-weight:600;
+            color:#fff;
+        }
+
+        .selected-count{
+            font-size:12px;
+            color:#00e6b8;
+            font-weight:600;
+        }
+
+        .players-box{
+            display:grid;
+            grid-template-columns:1fr;
+            gap:10px;
+            max-height:220px;
+            overflow-y:auto;
+            padding-right:4px;
+        }
+
+        .players-box::-webkit-scrollbar{
+            width:6px;
+        }
+
+        .players-box::-webkit-scrollbar-thumb{
+            background:rgba(255,255,255,0.2);
+            border-radius:20px;
+        }
+
+        .player-card{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            background:rgba(255,255,255,0.06);
+            border:1px solid rgba(255,255,255,0.08);
+            border-radius:14px;
+            padding:11px 12px;
+            cursor:pointer;
+            transition:0.2s;
+        }
+
+        .player-card:hover{
+            background:rgba(0,230,184,0.12);
+            border-color:rgba(0,230,184,0.35);
+            transform:translateY(-1px);
+        }
+
+        .player-card input[type="checkbox"]{
+            width:18px;
+            height:18px;
+            accent-color:#00e6b8;
+            cursor:pointer;
+            flex-shrink:0;
+        }
+
+        .player-name{
+            font-size:14px;
+            font-weight:500;
+            color:#fff;
+        }
+
+        .submit-btn{
+            margin-top:8px;
+            border:none;
+            border-radius:14px;
+            padding:14px;
+            font-size:15px;
+            font-weight:700;
+            cursor:pointer;
+            color:#06221d;
+            background:linear-gradient(90deg,#00f0c0,#00c3ff);
+            transition:0.25s;
+        }
+
+        .submit-btn:hover{
+            transform:translateY(-2px);
+            box-shadow:0 10px 25px rgba(0,195,255,0.25);
+        }
+
+        .error-box{
+            background:rgba(255,80,80,0.12);
+            border:1px solid rgba(255,80,80,0.35);
+            color:#ffb0b0;
+            border-radius:12px;
+            padding:12px;
+            font-size:14px;
+        }
+
+        @media (min-width:700px){
+            .players-box{
+                grid-template-columns:1fr 1fr;
+            }
+        }
+
+        @media (max-width:600px){
+            body{
+                padding:10px;
+            }
+
+            .form-card{
+                padding:16px;
+                border-radius:18px;
+            }
+
+            .title{
+                font-size:22px;
+                margin-bottom:16px;
+            }
+
+            .match-type-selector{
+                flex-direction:column;
+                gap:8px;
+            }
+
+            .match-type-btn{
+                padding:12px;
+                font-size:14px;
+            }
+
+            .row{
+                grid-template-columns:1fr;
+                gap:12px;
+            }
+
+            input,
+            select{
+                padding:12px;
+                font-size:14px;
+            }
+
+            .player-card{
+                padding:10px;
+            }
+
+            .team-header h3{
+                font-size:15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="form-card">
+
+        <!-- Back Button -->
+        <a href="javascript:history.back()" class="back-nav-btn">← Back</a>
+
+        <div class="title">🏏 Schedule Match</div>
+
+        <!-- Match Type Selector -->
+        <div class="match-type-selector">
+            <div class="match-type-btn" id="btnFriendly" onclick="selectMatchType('friendly')">
+                🤝 Friendly Match
+            </div>
+            <div class="match-type-btn" id="btnTournament" onclick="selectMatchType('tournament')">
+                🏆 Tournament Match
+            </div>
+        </div>
+
+        <!-- Tournament Selection (Hidden for Friendly) -->
+        <div class="tournament-select-box" id="tournamentSelectBox">
+            <div class="field">
+                <label>Select Tournament *</label>
+                <select id="tournamentId" name="tournamentId" onchange="onTournamentChange()">
+                    <option value="">-- Choose Tournament --</option>
+                    <option th:each="tournament : ${tournaments}"
+                            th:value="${tournament.tournamentId}"
+                            th:text="${tournament.tournamentName}">
+                    </option>
+                </select>
+            </div>
+        </div>
+
+        <form action="/admin/matches/add" method="post" class="match-form" onsubmit="return validateForm()">
+
+            <div th:if="${error}" class="error-box">
+                <span th:text="${error}"></span>
+            </div>
+
+            <!-- FIX: matchType hidden field — form ke saath submit hoga -->
+            <input type="hidden" name="matchType" id="hiddenMatchType" value="friendly">
+            <input type="hidden" name="tournamentId" id="hiddenTournamentId" value="">
+
+            <div class="row">
+                <div class="field">
+                    <label>Team 1</label>
+                    <select id="team1" name="team1Id" required>
+                        <option value="">Select Team 1</option>
+                        <option th:each="team : ${teams}"
+                                th:value="${team.teamId}"
+                                th:text="${team.teamName}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Team 2</label>
+                    <select id="team2" name="team2Id" required>
+                        <option value="">Select Team 2</option>
+                        <option th:each="team : ${teams}"
+                                th:value="${team.teamId}"
+                                th:text="${team.teamName}">
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="field">
+                    <label>Match Date</label>
+                    <input type="date" name="matchDate" required>
+                </div>
+
+                <div class="field">
+                    <label>Match Time</label>
+                    <input type="time" name="matchTime" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="field">
+                    <label>Overs</label>
+                    <input type="number" id="overs" name="overs" placeholder="20" min="1" max="50" required>
+                </div>
+
+                <div class="field">
+                    <label>Max Overs Per Bowler</label>
+                    <input type="number" id="maxOversPerBowler" name="maxOversPerBowler" placeholder="4" min="1" max="50" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Venue</label>
+                <input type="text" id="venue" name="venue" placeholder="e.g. Wankhede Stadium">
+            </div>
+
+            <div class="team-section">
+                <div class="team-header">
+                    <h3>Team 1 Playing 11</h3>
+                    <div class="selected-count" id="team1Count">0 / 11 Selected</div>
+                </div>
+
+                <div class="players-box" id="team1Players">
+                    <div style="opacity:.6;font-size:13px;">Select Team 1 first 👆</div>
+                </div>
+            </div>
+
+            <div class="team-section">
+                <div class="team-header">
+                    <h3>Team 2 Playing 11</h3>
+                    <div class="selected-count" id="team2Count">0 / 11 Selected</div>
+                </div>
+
+                <div class="players-box" id="team2Players">
+                    <div style="opacity:.6;font-size:13px;">Select Team 2 first 👆</div>
+                </div>
+            </div>
+
+            <input type="hidden" name="team1Squad" id="team1Squad">
+            <input type="hidden" name="team2Squad" id="team2Squad">
+
+            <button type="submit" class="submit-btn">Create Match 🚀</button>
+        </form>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // ── FIX: URL se tournamentId read karo — page reload ke baad state restore karo ──
+    const urlParams      = new URLSearchParams(window.location.search);
+    const urlTournamentId = urlParams.get('tournamentId') || '';
+
+    // Thymeleaf se pre-selected tournament (agar server ne pass kiya ho)
+    const serverTournamentId = /*[[${param.tournamentId != null ? param.tournamentId[0] : ''}]]*/ '';
+
+    // Effective tournament id — URL param ya server param se
+    const activeTournamentId = urlTournamentId || serverTournamentId || '';
+
+    // Agar tournamentId URL mein hai to automatically tournament mode mein start karo
+    let currentMatchType = activeTournamentId ? 'tournament' : 'friendly';
+
+    function applyMatchTypeUI(type) {
+        const btnFriendly    = document.getElementById('btnFriendly');
+        const btnTournament  = document.getElementById('btnTournament');
+        const tournamentBox  = document.getElementById('tournamentSelectBox');
+        const hiddenType     = document.getElementById('hiddenMatchType');
+
+        btnFriendly.classList.toggle('active', type === 'friendly');
+        btnTournament.classList.toggle('active', type === 'tournament');
+
+        if (type === 'tournament') {
+            tournamentBox.classList.add('show');
+        } else {
+            tournamentBox.classList.remove('show');
+            document.getElementById('hiddenTournamentId').value = '';
+            document.getElementById('tournamentId').value = '';
+        }
+
+        hiddenType.value = type;
+    }
+
+    function selectMatchType(type) {
+        currentMatchType = type;
+        applyMatchTypeUI(type);
+
+        // Friendly pe switch kiya — URL clean karo (bina reload ke)
+        if (type === 'friendly' && window.history.replaceState) {
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, '', cleanUrl);
+        }
+    }
+
+    function onTournamentChange() {
+        const tournamentId = document.getElementById('tournamentId').value;
+        document.getElementById('hiddenTournamentId').value = tournamentId;
+
+        if (tournamentId) {
+            // FIX: reload nahi karo — sirf URL update karo (history.replaceState)
+            // Isse page reload nahi hoga aur tournament mode bhi nahi tutega
+            if (window.history.replaceState) {
+                const newUrl = window.location.pathname + '?tournamentId=' + tournamentId;
+                window.history.replaceState({}, '', newUrl);
+            }
+        } else {
+            document.getElementById('hiddenTournamentId').value = '';
+            if (window.history.replaceState) {
+                window.history.replaceState({}, '', window.location.pathname);
+            }
+        }
+    }
+
+    // ── Page load pe state restore karo ──
+    document.addEventListener('DOMContentLoaded', function () {
+        applyMatchTypeUI(currentMatchType);
+
+        // Agar URL mein tournamentId tha to dropdown mein pre-select karo
+        if (activeTournamentId) {
+            const sel = document.getElementById('tournamentId');
+            sel.value = activeTournamentId;
+            document.getElementById('hiddenTournamentId').value = activeTournamentId;
+        }
+    });
+
+    async function loadTeamPlayers(teamSelectId, playersContainerId, hiddenInputId, countId) {
+        const teamId    = document.getElementById(teamSelectId).value;
+        const container = document.getElementById(playersContainerId);
+
+        container.innerHTML = "";
+
+        if (!teamId) {
+            container.innerHTML = `<div style="opacity:.6;font-size:13px;">Please select a team 👆</div>`;
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/players/team/${teamId}`);
+            const players  = await response.json();
+
+            if (!players.length) {
+                container.innerHTML = `<div style="opacity:.6;font-size:13px;">No players found 😕</div>`;
+                return;
+            }
+
+            players.forEach((player, idx) => {
+                const label       = document.createElement("label");
+                label.className   = "player-card";
+                const autoChecked = idx < 11;
+
+                label.innerHTML = `
+                    <input type="checkbox"
+                           value="${player.playerId}"
+                           ${autoChecked ? 'checked' : ''}
+                           onchange="updateSquad('${playersContainerId}', '${hiddenInputId}', '${countId}')">
+                    <div class="player-name">${player.playerName}</div>
+                `;
+
+                container.appendChild(label);
+            });
+
+            updateSquad(playersContainerId, hiddenInputId, countId);
+
+        } catch (err) {
+            console.error(err);
+            container.innerHTML = `<div style="color:#ff9a9a;font-size:13px;">Players load nahi hue 😢</div>`;
+        }
+    }
+
+    function updateSquad(containerId, hiddenId, countId) {
+        const checked = document.querySelectorAll(`#${containerId} input:checked`);
+
+        if (checked.length > 11) {
+            checked[checked.length - 1].checked = false;
+            alert("⚠️ Sirf 11 players select kar sakte ho!");
+            return;
+        }
+
+        const ids = Array.from(checked).map(cb => cb.value);
+        document.getElementById(hiddenId).value  = ids.join(",");
+        document.getElementById(countId).innerText = `${ids.length} / 11 Selected`;
+    }
+
+    document.getElementById("team1").addEventListener("change", function () {
+        const team1 = this.value;
+        const team2 = document.getElementById("team2").value;
+
+        if (team1 && team1 === team2) {
+            alert("⚠️ Team 1 aur Team 2 same nahi ho sakte!");
+            this.value = "";
+            return;
+        }
+
+        loadTeamPlayers("team1", "team1Players", "team1Squad", "team1Count");
+    });
+
+    document.getElementById("team2").addEventListener("change", function () {
+        const team2 = this.value;
+        const team1 = document.getElementById("team1").value;
+
+        if (team2 && team2 === team1) {
+            alert("⚠️ Team 1 aur Team 2 same nahi ho sakte!");
+            this.value = "";
+            return;
+        }
+
+        loadTeamPlayers("team2", "team2Players", "team2Squad", "team2Count");
+    });
+
+    function validateForm() {
+        const team1    = document.getElementById("team1").value;
+        const team2    = document.getElementById("team2").value;
+        const overs    = parseInt(document.getElementById("overs").value || 0);
+        const maxBowler = parseInt(document.getElementById("maxOversPerBowler").value || 0);
+        const team1Players = document.getElementById("team1Squad").value.split(",").filter(Boolean);
+        const team2Players = document.getElementById("team2Squad").value.split(",").filter(Boolean);
+
+        if (team1 === team2) {
+            alert("⚠️ Dono teams same nahi ho sakte!");
+            return false;
+        }
+
+        if (currentMatchType === 'tournament' && !document.getElementById('hiddenTournamentId').value) {
+            alert("⚠️ Tournament match ke liye tournament select karo!");
+            return false;
+        }
+
+        if (maxBowler > overs) {
+            alert("⚠️ Max overs per bowler, total overs se zyada nahi ho sakta!");
+            return false;
+        }
+
+        if (team1Players.length !== 11) {
+            alert("⚠️ Team 1 ke exactly 11 players select karo!");
+            return false;
+        }
+
+        if (team2Players.length !== 11) {
+            alert("⚠️ Team 2 ke exactly 11 players select karo!");
+            return false;
+        }
+
+        return true;
+    }
+</script>
+
+</body>
+</html>

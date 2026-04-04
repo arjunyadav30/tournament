@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Management | NPL Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 🔥 GLOBAL STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            min-height: 100vh;
+        }
+
+        /* 🔥 NAVBAR (As per your admin.css) */
+        .navbar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ffcc, #00c3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .nav-links li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.3s;
+            font-size: 15px;
+        }
+
+        .nav-links li a:hover {
+            color: #00ffcc;
+        }
+
+        .logout { color: #ff6b6b !important; }
+
+        .menu-toggle {
+            display: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: white;
+        }
+
+        /* 🔥 CONTENT CONTAINER */
+        .container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 🔥 ACTION BUTTONS GRID */
+        .top-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .action-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            padding: 40px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-decoration: none;
+            color: white;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .action-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: #00ffcc;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .icon {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        .action-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .action-card p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* 🔥 MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .nav-links {
+                position: absolute;
+                top: 70px;
+                left: -100%;
+                width: 100%;
+                background: rgba(15, 32, 39, 0.95);
+                flex-direction: column;
+                padding: 30px;
+                transition: 0.4s;
+                backdrop-filter: blur(20px);
+            }
+            .nav-links.active { left: 0; }
+            .top-actions { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo">🏏 NPL PLAYERS</div>
+        
+        <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="/admin/dashboard">Dashboard</a></li>
+            <li><a href="/admin/teams">Teams</a></li>
+            <li><a href="/admin/matches">Matches</a></li>
+            <li><a href="/admin/profile">Profile</a></li>
+            <li><a href="/logout" class="logout">Logout</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <h1 style="font-size: 36px; margin-bottom: 10px;">Player Management</h1>
+    <p style="color: rgba(255,255,255,0.7);">Manage your tournament squads and individual player statistics</p>
+
+    <!-- Flash messages -->
+    <div th:if="${success}" style="background:rgba(0,255,150,0.15);border:1px solid #00ff96;padding:12px 20px;border-radius:10px;color:#00ff96;margin:16px 0;">
+        ✅ <span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" style="background:rgba(255,100,100,0.15);border:1px solid #ff6464;padding:12px 20px;border-radius:10px;color:#ff9999;margin:16px 0;">
+        ⚠️ <span th:text="${error}"></span>
+    </div>
+
+    <div class="top-actions">
+        <a href="/admin/players/add" class="action-card">
+            <div class="icon">👤</div>
+            <h3>Add New Player</h3>
+            <p>Register a new player to a team squad</p>
+        </a>
+
+        <a href="/admin/players/list" class="action-card">
+            <div class="icon">📋</div>
+            <h3>All Players List</h3>
+            <p>View, edit or remove existing players</p>
+        </a>
+    </div>
+</div>
+
+<script>
+function toggleMenu() {
+    document.getElementById("navLinks").classList.toggle("active");
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Player | NPL Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 🔥 GLOBAL STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 🔥 NAVBAR */
+        .navbar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar h2 {
+            background: linear-gradient(45deg, #00ffcc, #00c3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        /* 🔥 FORM CONTAINER */
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .form-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-card h2 {
+            font-size: 26px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #00ffcc;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        /* 🔥 FORM FIELDS */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            margin-left: 5px;
+        }
+
+        input, select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 14px;
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        select option {
+            background: #203a43;
+            color: white;
+        }
+
+        input:focus, select:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #00ffcc;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+        }
+
+        /* 🔥 BUTTON */
+        button {
+            background: linear-gradient(45deg, #00ffcc, #00c3ff);
+            color: #000;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 204, 0.4);
+            filter: brightness(1.1);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            .form-card { padding: 25px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <h2>🏏 NPL Player Registration</h2>
+</nav>
+
+<div class="container">
+
+    <div class="form-card">
+        <h2>Register New Player</h2>
+
+        <div th:if="${success}" style="background:rgba(0,255,150,0.15);border:1px solid #00ff96;padding:10px 16px;border-radius:10px;color:#00ff96;margin-bottom:16px;">
+            ✅ <span th:text="${success}"></span>
+        </div>
+
+        <form action="/admin/players/add" method="post">
+
+            <div class="input-group">
+                <label>Player Full Name</label>
+                <input type="text" name="playerName" placeholder="Enter name" required>
+            </div>
+
+            <div class="input-group">
+                <label>Playing Role</label>
+                <select name="role">
+                    <option value="Batsman">🏏 Batsman</option>
+                    <option value="Bowler">⚾ Bowler</option>
+                    <option value="All-Rounder">🌟 All-Rounder</option>
+                    <option value="Wicket-Keeper">🧤 Wicket-Keeper</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Assign to Team</label>
+                <select name="teamId" required>
+                    <option value="">Choose Team</option>
+                    <option th:each="team : ${teams}" 
+                            th:value="${team.teamId}" 
+                            th:text="${team.teamName}">
+                    </option>
+                </select>
+            </div>
+
+            <button type="submit">Add Player to Squad</button>
+
+        </form>
+    </div>
+
+</div>
+
+</body>
+</html>

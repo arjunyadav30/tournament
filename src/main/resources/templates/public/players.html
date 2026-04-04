@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Players - CricketPro</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <h2 class="logo">🏏 CricketPro</h2>
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="/">Home</a></li>
+            <li><a href="/teams">Teams</a></li>
+            <li><a href="/players" class="active">Players</a></li>
+            <li><a href="/matches">Matches</a></li>
+            <li><a href="/login" class="btn-login">Login</a></li>
+            <li><a href="/signup" class="btn-signup" style="pointer-events: none; opacity: 0.5;">Signup</a></li>
+        </ul>
+    </div>
+</nav>
+
+<section class="players-section">
+    <div class="container">
+        <h2 class="section-title">All Players</h2>
+        
+        <div class="players-grid" th:if="${#lists.isEmpty(players)}">
+            <div class="no-data">
+                <div class="icon">🏏</div>
+                <h3>No Players Available</h3>
+                <p>Check back later for players!</p>
+            </div>
+        </div>
+
+        <div class="players-grid" th:unless="${#lists.isEmpty(players)}">
+            <div class="player-card" th:each="player : ${players}">
+                <div class="player-header">
+                    <div class="player-icon">👤</div>
+                    <div class="player-basic">
+                        <h3 th:text="${player.playerName}">Player Name</h3>
+                        <span class="player-role" th:text="${player.role}">Role</span>
+                    </div>
+                </div>
+                
+                <div class="player-info">
+                    <div class="info-row">
+                        <span class="label">Team:</span>
+                        <span class="value" th:text="${player.team != null ? player.team.teamName : 'No Team'}"></span>
+                    </div>
+                </div>
+
+                <div class="player-stats">
+                    <div class="stat">
+                        <div class="stat-value" th:text="${player.matchesPlayed}">0</div>
+                        <div class="stat-label">Matches</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" th:text="${player.totalRuns}">0</div>
+                        <div class="stat-label">Runs</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" th:text="${player.totalWickets}">0</div>
+                        <div class="stat-label">Wickets</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" th:text="${player.strikeRate}">0</div>
+                        <div class="stat-label">Strike Rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="container">
+        <p>&copy; 2026 CricketPro. All rights reserved.</p>
+        <div class="social-links">
+            <a href="#">Facebook</a>
+            <a href="#">Twitter</a>
+            <a href="#">Instagram</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+function toggleMenu() {
+    const nav = document.getElementById("navLinks");
+    nav.classList.toggle("active");
+}
+</script>
+
+</body>
+</html>

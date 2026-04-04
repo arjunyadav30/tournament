@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Teams | NPL Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 🔥 RESET & GLOBAL STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            min-height: 100vh;
+            background-attachment: fixed;
+            padding-bottom: 50px;
+        }
+
+        /* 🔥 NAVBAR */
+        .navbar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar h2 {
+            background: linear-gradient(45deg, #00ffcc, #00c3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+
+        /* 🔥 MAIN CONTAINER */
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .title-section {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .title-section h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .title-section p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+
+        /* 🔥 TABLE DESIGN (GLASSMORPHISM) */
+        .table-wrapper {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto; /* Mobile par scroll ke liye */
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 900px; /* Ensure columns have enough space */
+        }
+
+        th {
+            background: rgba(0, 255, 204, 0.15);
+            color: #00ffcc;
+            padding: 20px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(0, 255, 204, 0.3);
+        }
+
+        td {
+            padding: 18px 20px;
+            font-size: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.9);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.08);
+            transition: 0.3s ease;
+            color: #fff;
+        }
+
+        /* 🔥 HIGHLIGHTS & BADGES */
+        .team-name {
+            font-weight: 700;
+            color: #ffffff;
+            font-size: 16px;
+        }
+
+        .captain-name {
+            color: #00c3ff;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid rgba(0, 255, 204, 0.4);
+            background: rgba(0, 255, 204, 0.1);
+            color: #00ffcc;
+        }
+
+        /* 🔥 STATS COLORING */
+        .stat-win { color: #00ffcc; font-weight: 700; font-size: 18px; text-align: center; }
+        .stat-loss { color: #ff6b6b; font-weight: 600; text-align: center; }
+        .stat-played { color: #f1c40f; font-weight: 600; text-align: center; }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .container { margin: 20px auto; padding: 0 10px; }
+            th, td { padding: 15px 10px; font-size: 13px; }
+            .title-section h2 { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <h2>🏏 NPL TEAM STANDINGS</h2>
+</nav>
+
+<div class="container">
+
+    <!-- Flash messages -->
+    <div th:if="${success}" style="background:rgba(0,255,150,0.15);border:1px solid #00ff96;padding:12px 20px;border-radius:10px;color:#00ff96;margin-bottom:16px;">
+        ✅ <span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" style="background:rgba(255,100,100,0.15);border:1px solid #ff6464;padding:12px 20px;border-radius:10px;color:#ff9999;margin-bottom:16px;">
+        ⚠️ <span th:text="${error}"></span>
+    </div>
+
+    <div class="title-section">
+        <h2>Participating Teams</h2>
+        <p>Current rankings and statistics of all teams in the tournament</p>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Team Name</th>
+                    <th>Captain</th>
+                    <th>Village</th>
+                    <th>Status</th>
+                    <th style="text-align: center;">Matches</th>
+                    <th style="text-align: center;">Wins</th>
+                    <th style="text-align: center;">Losses</th>
+                    <th style="text-align: center;">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr th:each="team : ${teams}">
+                    <td th:text="${team.teamId}" style="color: rgba(255,255,255,0.3); font-size: 12px;"></td>
+                    <td class="team-name" th:text="${team.teamName}"></td>
+                    <td class="captain-name" th:text="${team.captainName}"></td>
+                    <td th:text="${team.village}"></td>
+                    <td>
+                        <span class="status-badge" th:text="${team.status}"></span>
+                    </td>
+                    <td th:text="${team.totalMatches}" class="stat-played"></td>
+                    <td th:text="${team.totalWins}" class="stat-win"></td>
+                    <td th:text="${team.totalLosses}" class="stat-loss"></td>
+                    <td style="text-align:center;">
+                        <form th:action="@{'/admin/teams/delete/' + ${team.teamId}}" method="post"
+                              onsubmit="return confirm('⚠️ Team aur uske saare matches delete ho jayenge. Confirm?');">
+                            <button type="submit" style="background:rgba(255,60,60,0.15);color:#ff6b6b;border:1px solid rgba(255,60,60,0.4);padding:5px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;transition:0.3s;"
+                                    onmouseover="this.style.background='rgba(255,60,60,0.35)'"
+                                    onmouseout="this.style.background='rgba(255,60,60,0.15)'">
+                                🗑 Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

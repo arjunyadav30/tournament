@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Details | CricketPro Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); color: white; font-family: 'Poppins', sans-serif; min-height: 100vh; }
+        .navbar { background: rgba(255,255,255,0.05) !important; backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .navbar-brand { font-weight: 700; color: #00ffcc !important; font-size: 22px; }
+        .nav-link { color: rgba(255,255,255,0.8) !important; font-weight: 500; }
+        .nav-link:hover, .nav-link.active { color: #00ffcc !important; }
+        .page-header { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; backdrop-filter: blur(10px); padding: 24px; margin-bottom: 24px; }
+        .section-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; backdrop-filter: blur(10px); padding: 20px; margin-bottom: 20px; }
+        .btn-npl { background: linear-gradient(45deg, #00ffcc, #00c3ff); border: none; color: black; font-weight: 700; padding: 10px 20px; border-radius: 12px; font-size: 14px; }
+        .btn-npl:hover { opacity: 0.9; transform: translateY(-2px); color: black; }
+        .badge-status { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge-upcoming { background: rgba(255,210,0,0.2); color: #ffd200; border: 1px solid #ffd200; }
+        .badge-ongoing { background: rgba(255,65,108,0.2); color: #ff416c; border: 1px solid #ff416c; }
+        .badge-completed { background: rgba(86,171,47,0.2); color: #56ab2f; border: 1px solid #56ab2f; }
+        .stat-box { background: rgba(255,255,255,0.08); border-radius: 14px; padding: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        .stat-number { font-size: 32px; font-weight: 700; color: #00ffcc; }
+        .stat-label { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+        .table-container { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; }
+        .table { margin-bottom: 0; color: white; }
+        .table thead { background: rgba(0,255,204,0.15); }
+        .table thead th { border-bottom: 2px solid rgba(0,255,204,0.3); padding: 12px; font-weight: 600; font-size: 13px; }
+        .table tbody td { border-bottom: 1px solid rgba(255,255,255,0.08); padding: 12px; vertical-align: middle; font-size: 13px; }
+        .table tbody tr:hover { background: rgba(0,255,204,0.08); }
+        .empty-state { text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.5); }
+        @media (max-width: 768px) {
+            .page-header { padding: 16px; }
+            .section-card { padding: 14px; }
+            .stat-number { font-size: 24px; }
+            .table { font-size: 12px; }
+            .btn-npl { padding: 8px 14px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand" href="/admin/dashboard">🏏 CricketPro Admin</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto text-center">
+                <li class="nav-item"><a class="nav-link" href="/admin/dashboard">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/admin/tournaments">Tournaments</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/teams">Teams</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/matches">Matches</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/players">Players</a></li>
+                <li class="nav-item"><a class="nav-link text-danger" href="/logout">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <!-- Tournament Header -->
+    <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">🏆 <span th:text="${tournament.tournamentName}">Tournament Name</span></h2>
+            <p class="text-white-50 mb-0">
+                <span th:if="${tournament.location}" th:text="'📍 ' + ${tournament.location} + ' | '"></span>
+                <span>📅 </span>
+                <span th:text="${tournament.startDate != null ? tournament.startDate : 'TBD'}"></span>
+                <span th:if="${tournament.endDate}" th:text="' - ' + ${tournament.endDate}"></span>
+            </p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a th:href="@{/admin/matches/add(tournamentId=${tournament.tournamentId})}" class="btn btn-npl">+ Schedule Match</a>
+            <a th:href="@{/tournament/{id}(id=${tournament.tournamentId})}" class="btn btn-npl" target="_blank" style="background:rgba(255,255,255,0.1);color:white;">👁 View Public Page</a>
+            <a href="/admin/tournaments" class="btn btn-npl" style="background:rgba(255,255,255,0.1);color:white;">← All Tournaments</a>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-box">
+                <div class="stat-number" th:text="${#lists.size(tournaments)}">0</div>
+                <div class="stat-label">Total Tournaments</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-box">
+                <div class="stat-number" th:text="${#lists.size(teams)}">0</div>
+                <div class="stat-label">Registered Teams</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-box">
+                <div class="stat-number" th:text="${#lists.size(matches)}">0</div>
+                <div class="stat-label">Scheduled Matches</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-box">
+                <div class="stat-number" th:text="${tournament.status}">Upcoming</div>
+                <div class="stat-label">Status</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tournament Info -->
+    <div class="section-card">
+        <h4 class="mb-3">📋 Tournament Information</h4>
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <strong>Organizer:</strong>
+                <p class="text-white-50" th:text="${tournament.organizer ?: '-'}">-</p>
+            </div>
+            <div class="col-6 col-md-3">
+                <strong>Start Date:</strong>
+                <p class="text-white-50" th:text="${tournament.startDate ?: '-'}">-</p>
+            </div>
+            <div class="col-6 col-md-3">
+                <strong>End Date:</strong>
+                <p class="text-white-50" th:text="${tournament.endDate ?: 'Not Set'}">-</p>
+            </div>
+            <div class="col-6 col-md-3">
+                <strong>Status:</strong>
+                <p class="text-white-50">
+                    <span class="badge-status"
+                          th:classappend="${tournament.status == 'Upcoming'} ? 'badge-upcoming' : (${tournament.status == 'Ongoing'} ? 'badge-ongoing' : 'badge-completed')"
+                          th:text="${tournament.status}">Upcoming</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Teams Section -->
+    <div class="section-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">🏏 Tournament Teams</h4>
+            <span class="badge bg-info" th:text="${#lists.size(teams)} + ' teams'">0 teams</span>
+        </div>
+        
+        <div th:if="${#lists.isEmpty(teams)}" class="empty-state">
+            <p>No teams registered for this tournament yet</p>
+            <a href="/admin/teams/add" class="btn btn-npl mt-2">+ Add Team</a>
+        </div>
+        
+        <div class="table-responsive" th:if="${!#lists.isEmpty(teams)}">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Team Name</th>
+                        <th>Captain</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="team : ${teams}">
+                        <td th:text="${team.teamId}">1</td>
+                        <td><strong th:text="${team.teamName}">Team Name</strong></td>
+                        <td th:text="${team.captain ?: '-'}">-</td>
+                        <td th:text="${team.village ?: '-'}">-</td>
+                        <td>
+                            <span class="badge bg-success" th:text="${team.status}">Active</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Matches Section -->
+    <div class="section-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">📅 Tournament Matches</h4>
+            <a th:href="@{/admin/matches/add(tournamentId=${tournament.tournamentId})}" class="btn btn-npl">+ Schedule Match</a>
+        </div>
+        
+        <div th:if="${#lists.isEmpty(matches)}" class="empty-state">
+            <p>No matches scheduled yet</p>
+            <a th:href="@{/admin/matches/add(tournamentId=${tournament.tournamentId})}" class="btn btn-npl mt-2">Schedule First Match</a>
+        </div>
+        
+        <div class="table-responsive" th:if="${!#lists.isEmpty(matches)}">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Match</th>
+                        <th>Venue</th>
+                        <th>Overs</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="match : ${matches}" th:if="${match.tournament != null and match.tournament.tournamentId == tournament.tournamentId}">
+                        <td th:text="${match.matchDate}">2026-04-01</td>
+                        <td th:text="${match.matchTime}">10:00</td>
+                        <td>
+                            <strong>
+                                <span th:text="${match.team1.teamName}">Team 1</span> vs 
+                                <span th:text="${match.team2.teamName}">Team 2</span>
+                            </strong>
+                        </td>
+                        <td th:text="${match.venue ?: '-'}">-</td>
+                        <td th:text="${match.overs + ' overs'}">20</td>
+                        <td>
+                            <span class="badge-status"
+                                  th:classappend="${match.status == 'Upcoming'} ? 'badge-upcoming' : (${match.status == 'Live'} ? 'badge-ongoing' : 'badge-completed')"
+                                  th:text="${match.status}">Upcoming</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/admin/matches/score/{id}(id=${match.matchId})}" 
+                               class="btn btn-sm btn-npl" 
+                               style="padding:4px 10px;font-size:12px;"
+                               th:if="${match.status == 'Live' or match.status == 'Completed'}">Scorecard</a>
+                            <a th:href="@{/match/{id}(id=${match.matchId})}" 
+                               class="btn btn-sm btn-npl" 
+                               style="padding:4px 10px;font-size:12px;background:rgba(255,255,255,0.1);color:white;" 
+                               target="_blank"
+                               th:if="${match.status == 'Live' or match.status == 'Completed'}">Match Summary</a>
+                            <span th:if="${match.status == 'Upcoming'}" class="text-white-50" style="font-size:12px;">Pending</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Players | NPL Statistics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 🔥 GLOBAL STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            min-height: 100vh;
+        }
+
+        /* 🔥 NAVBAR */
+        .navbar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar h2 {
+            background: linear-gradient(45deg, #00ffcc, #00c3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        /* 🔥 CONTAINER */
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 20px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 🔥 TABLE WRAPPER (For Horizontal Scroll) */
+        .table-wrapper {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto; /* Mobile par scroll chalega */
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 🔥 CUSTOM SCROLLBAR */
+        .table-wrapper::-webkit-scrollbar {
+            height: 8px;
+        }
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: #00ffcc;
+            border-radius: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 1000px; /* Ensure table doesn't shrink too much */
+        }
+
+        th {
+            background: rgba(0, 255, 204, 0.1);
+            color: #00ffcc;
+            padding: 18px 15px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        td {
+            padding: 15px;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transition: 0.3s;
+        }
+
+        /* 🔥 HIGHLIGHT STYLES */
+        .player-name {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .role-badge {
+            background: rgba(0, 195, 255, 0.2);
+            color: #00c3ff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: #00ffcc;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            th, td { padding: 12px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <h2>🏏 All Players Statistics</h2>
+</nav>
+
+<div class="container">
+
+    <!-- Flash messages -->
+    <div th:if="${success}" style="background:rgba(0,255,150,0.15);border:1px solid #00ff96;padding:12px 20px;border-radius:10px;color:#00ff96;margin-bottom:16px;">
+        ✅ <span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" style="background:rgba(255,100,100,0.15);border:1px solid #ff6464;padding:12px 20px;border-radius:10px;color:#ff9999;margin-bottom:16px;">
+        ⚠️ <span th:text="${error}"></span>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+        <h2 style="font-size:20px;background:linear-gradient(45deg,#00ffcc,#00c3ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+            All Players
+        </h2>
+        <a href="/admin/players/add" style="background:linear-gradient(45deg,#00ffcc,#00c3ff);color:#000;padding:10px 20px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;">
+            ➕ Add Player
+        </a>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Team</th>
+                    <th>Mat</th>
+                    <th>Runs</th>
+                    <th>SR</th>
+                    <th>Wkts</th>
+                    <th>Eco</th>
+                    <th>50s</th>
+                    <th>100s</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr th:each="p : ${players}">
+                    <td th:text="${p.playerId}"></td>
+                    <td class="player-name" th:text="${p.playerName}"></td>
+                    <td><span class="role-badge" th:text="${p.role}"></span></td>
+                    <td th:text="${p.team != null ? p.team.teamName : 'Free Agent'}" style="color: #f093fb;"></td>
+                    <td th:text="${p.matchesPlayed}"></td>
+                    <td class="stat-value" th:text="${p.totalRuns}"></td>
+                    <td th:text="${p.strikeRate}"></td>
+                    <td class="stat-value" th:text="${p.totalWickets}"></td>
+                    <td th:text="${p.economy}"></td>
+                    <td th:text="${p.fifties}" style="color: #fffa65;"></td>
+                    <td th:text="${p.hundreds}" style="color: #ffaf40;"></td>
+                    <td>
+                        <form th:action="@{'/admin/players/delete/' + ${p.playerId}}" method="post"
+                              onsubmit="return confirm('Player delete ho jayega. Confirm?');">
+                            <button type="submit" style="background:rgba(255,60,60,0.15);color:#ff6b6b;border:1px solid rgba(255,60,60,0.4);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:0.3s;"
+                                    onmouseover="this.style.background='rgba(255,60,60,0.35)'"
+                                    onmouseout="this.style.background='rgba(255,60,60,0.15)'">
+                                🗑 Del
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>

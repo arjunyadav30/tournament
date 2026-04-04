@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Tournament | CricketPro Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* GLOBAL STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar h2 {
+            background: linear-gradient(45deg, #00ffcc, #00c3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        /* FORM CONTAINER */
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .form-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .form-card h2 {
+            font-size: 26px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #00ffcc;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        }
+
+        /* FORM FIELDS */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+            margin-left: 5px;
+        }
+
+        input, select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 14px 18px;
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        select option {
+            background: #1c333b;
+            color: white;
+        }
+
+        input:focus, select:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #00ffcc;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+        }
+
+        /* BUTTON */
+        button {
+            background: linear-gradient(45deg, #00ffcc, #00c3ff);
+            color: #000;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.4s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 204, 0.4);
+            filter: brightness(1.1);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* BACK LINK */
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .back-link:hover {
+            color: #00ffcc;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            .form-card { padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <h2>🏆 CREATE NEW TOURNAMENT</h2>
+</nav>
+
+<div class="container">
+
+    <div class="form-card">
+        <h2>Tournament Setup</h2>
+
+        <div th:if="${errorMessage}" style="background:rgba(255,100,100,0.15);border:1px solid #ff6464;padding:10px 16px;border-radius:10px;color:#ff9999;margin-bottom:16px;">
+            ⚠️ <span th:text="${errorMessage}"></span>
+        </div>
+
+        <form action="/admin/tournaments/add" method="post">
+
+            <div class="input-group">
+                <label>Tournament Name *</label>
+                <input type="text" name="tournamentName" placeholder="e.g. Inter Village Cricket Championship 2026" required>
+            </div>
+
+            <div class="input-group">
+                <label>Start Date *</label>
+                <input type="date" name="startDateStr" required>
+            </div>
+
+            <div class="input-group">
+                <label>End Date (Optional)</label>
+                <input type="date" name="endDateStr">
+            </div>
+
+            <div class="input-group">
+                <label>Location / Venue</label>
+                <input type="text" name="location" placeholder="e.g. Netyakhedi Main Ground">
+            </div>
+
+            <div class="input-group">
+                <label>Organizer</label>
+                <input type="text" name="organizer" placeholder="e.g. Netyakhedi Sports Club">
+            </div>
+
+            <div class="input-group">
+                <label>Status</label>
+                <select name="status">
+                    <option value="Upcoming">📅 Upcoming</option>
+                    <option value="Ongoing">🔴 Ongoing</option>
+                    <option value="Completed">✅ Completed</option>
+                </select>
+            </div>
+
+            <button type="submit">Create Tournament</button>
+
+        </form>
+
+        <a href="/admin/tournaments" class="back-link">← Back to Tournaments</a>
+    </div>
+
+</div>
+
+</body>
+</html>

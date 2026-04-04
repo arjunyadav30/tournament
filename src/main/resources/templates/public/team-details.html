@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title th:text="${team.teamName} + ' | CricketPro'">Team Details</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);color:white;min-height:100vh;padding-bottom:50px;}
+.container{max-width:860px;margin:auto;padding:24px 16px;}
+
+.hero{background:rgba(255,255,255,0.07);border-radius:20px;padding:28px;margin-bottom:20px;display:flex;gap:20px;flex-wrap:wrap;}
+.avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(45deg,#00ffcc,#00c3ff);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:#0f2027;}
+.hero-info h1{font-size:22px;font-weight:700;}
+.hero-info p{font-size:13px;color:rgba(255,255,255,0.6);}
+
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.stat-box{text-align:center;background:rgba(255,255,255,0.07);padding:18px;border-radius:12px;}
+.stat-val{font-size:26px;font-weight:700;color:#00ffcc;}
+
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px;}
+.info-box{background:rgba(255,255,255,0.06);padding:14px;border-radius:12px;}
+
+.section-card{background:rgba(255,255,255,0.06);border-radius:16px;overflow:hidden;}
+.section-head{padding:12px 18px;font-weight:600;}
+
+.player-table{width:100%;border-collapse:collapse;}
+.player-table th,.player-table td{padding:10px;font-size:13px;}
+.player-table tr{border-bottom:1px solid rgba(255,255,255,0.05);}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- TEAM INFO -->
+  <div class="hero">
+    <div class="avatar" th:text="${#strings.substring(team.teamName,0,1)}">T</div>
+
+    <div class="hero-info">
+      <h1 th:text="${team.teamName}">Team</h1>
+
+      <p>Captain:
+        <span th:text="${team.captainName != null ? team.captainName : 'TBA'}"></span>
+      </p>
+
+      <p>
+        <span th:text="${team.village != null ? team.village : 'Location TBA'}"></span>
+      </p>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stat-val" th:text="${team.totalMatches}">0</div>
+      <div>Matches</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" th:text="${team.totalWins}">0</div>
+      <div>Wins</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" th:text="${team.totalLosses}">0</div>
+      <div>Losses</div>
+    </div>
+  </div>
+
+  <!-- EXTRA -->
+  <div class="info-grid">
+
+    <div class="info-box">
+      Win Rate:
+      <span th:text="${team.totalMatches > 0 ? (team.totalWins * 100 / team.totalMatches) + '%' : 'N/A'}"></span>
+    </div>
+
+    <div class="info-box">
+      Tournament:
+      <span th:text="${team.tournament != null ? team.tournament.tournamentName : 'No Tournament'}"></span>
+    </div>
+
+    <div class="info-box">
+      Players:
+      <span th:text="${players != null ? #lists.size(players) : 0}"></span>
+    </div>
+
+  </div>
+
+  <!-- PLAYERS -->
+  <div class="section-card">
+    <div class="section-head">Players</div>
+
+    <table class="player-table" th:if="${players != null and !#lists.isEmpty(players)}">
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Role</th>
+      </tr>
+
+      <tr th:each="p, stat : ${players}">
+        <td th:text="${stat.count}"></td>
+        <td th:text="${p.playerName}"></td>
+        <td th:text="${p.role != null ? p.role : '-'}"></td>
+      </tr>
+    </table>
+
+    <div th:if="${players == null or #lists.isEmpty(players)}">
+      No players found
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

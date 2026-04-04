@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Management | NPL Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 🔥 GLOBAL STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        /* 🔥 NAVBAR */
+        .navbar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar h2 {
+            background: linear-gradient(45deg, #00ffcc, #00c3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 🔥 TOP ACTIONS & FILTERS */
+        .top-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ffcc, #00c3ff);
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 255, 204, 0.3);
+        }
+
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 255, 204, 0.5); }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .filter-btn:hover { color: white; background: rgba(255, 255, 255, 0.1); }
+        .live-btn-active { background: #ff416c !important; color: white !important; }
+
+        /* 🔥 MATCH CARDS GRID */
+        .matches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .match-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            transition: 0.4s;
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .match-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(0, 255, 204, 0.4);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 20px;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .teams-row {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .team h3 { font-size: 18px; font-weight: 700; text-align: center; max-width: 120px; }
+        .vs { 
+            font-size: 14px; 
+            font-weight: 800; 
+            background: #ff416c; 
+            padding: 5px 10px; 
+            border-radius: 8px;
+            color: white;
+        }
+
+        /* STATUS BADGES */
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .upcoming { background: rgba(0, 195, 255, 0.2); color: #00c3ff; border: 1px solid #00c3ff; }
+        .live { background: rgba(255, 65, 108, 0.2); color: #ff416c; border: 1px solid #ff416c; animation: pulse 2s infinite; }
+        .completed { background: rgba(0, 255, 204, 0.2); color: #00ffcc; border: 1px solid #00ffcc; }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 65, 108, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 65, 108, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 65, 108, 0); }
+        }
+
+        /* ACTIONS */
+        .action-area {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .score-btn {
+            display: block;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .score-btn:hover { background: #00ffcc; color: black; border-color: #00ffcc; }
+
+        .live-start-btn {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            color: white;
+            border: none;
+            box-shadow: 0 5px 15px rgba(255, 65, 108, 0.3);
+        }
+
+        .delete-btn {
+            width: 100%;
+            background: rgba(255, 60, 60, 0.15);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 60, 60, 0.4);
+            padding: 8px 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .delete-btn:hover {
+            background: rgba(255, 60, 60, 0.35);
+            border-color: #ff3c3c;
+            color: #fff;
+        }
+
+        @media (max-width: 600px) {
+            .top-actions { flex-direction: column; text-align: center; }
+            .matches-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <h2>🏏 NPL Match Management</h2>
+</nav>
+
+<div class="container">
+
+    <!-- Flash messages -->
+    <div th:if="${success}" style="background:rgba(0,255,150,0.15);border:1px solid #00ff96;padding:12px 20px;border-radius:10px;color:#00ff96;margin-bottom:20px;">
+        ✅ <span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" style="background:rgba(255,100,100,0.15);border:1px solid #ff6464;padding:12px 20px;border-radius:10px;color:#ff9999;margin-bottom:20px;">
+        ⚠️ <span th:text="${error}"></span>
+    </div>
+
+    <div class="top-actions">
+        <a href="/admin/matches/add" class="btn">➕ Schedule New Match</a>
+        
+        <div class="filter-buttons">
+            <button onclick="loadMatches('all')" class="filter-btn">All</button>
+            <button onclick="loadMatches('Upcoming')" class="filter-btn">Upcoming</button>
+            <button onclick="loadMatches('Live')" class="filter-btn">Live</button>
+            <button onclick="loadMatches('Completed')" class="filter-btn">Completed</button>
+        </div>
+    </div>
+
+    <div id="matchContainer" class="matches-grid">
+
+        <div class="match-card" th:each="match : ${matches}">
+            
+            <div class="match-header">
+                <span th:text="${match.matchDate != null ? #temporals.format(match.matchDate, 'dd MMM yyyy') : 'TBD'}"></span>
+                <span th:text="${match.matchTime != null ? match.matchTime : ''}"></span>
+            </div>
+
+            <div class="teams-row">
+                <div class="team">
+                    <h3 th:text="${match.team1.teamName}">Team 1</h3>
+                </div>
+                <div class="vs">VS</div>
+                <div class="team">
+                    <h3 th:text="${match.team2.teamName}">Team 2</h3>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <span th:text="${match.status}" 
+                      th:class="'status-badge ' + ${match.status.toLowerCase()}">
+                </span>
+                <p style="font-size: 12px; color: rgba(255,255,255,0.5);" th:text="${match.venue}">Stadium Name</p>
+                <p style="font-size: 11px; color: rgba(255,255,255,0.35);" th:text="'🎯 ' + ${match.overs} + ' Overs'"></p>
+                <p style="font-size: 11px; color: rgba(255,255,255,0.35);" th:text="'⚾ Max/Bowler: ' + ${(match.maxOversPerBowler > 0 ? match.maxOversPerBowler : 4)}"></p>
+            </div>
+
+            <div class="action-area">
+                <div th:if="${match.status == 'Live'}">
+                    <a th:href="@{'/admin/matches/score/toss/' + ${match.matchId}}" class="score-btn">
+                        📊 Update Scoreboard
+                    </a>
+                </div>
+
+                <div th:if="${match.status == 'Upcoming'}">
+                    <a th:href="@{'/admin/matches/start/' + ${match.matchId}}" class="score-btn live-start-btn">
+                        ▶ Start Match (Toss)
+                    </a>
+                </div>
+
+                <div th:if="${match.status == 'Completed'}">
+                    <a th:href="@{'/match/' + ${match.matchId}}" class="score-btn">
+                        📜 View Summary
+                    </a>
+                </div>
+
+                <!-- DELETE button — har match ke liye -->
+                <form th:action="@{'/admin/matches/delete/' + ${match.matchId}}" method="post"
+                      onsubmit="return confirm('⚠️ Match aur uska saara data delete ho jayega. Confirm?');"
+                      style="margin-top:8px;">
+                    <button type="submit" class="delete-btn">🗑 Delete</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+function loadMatches(status) {
+    if (status === 'all') {
+        window.location.href = "/admin/matches";
+    } else {
+        window.location.href = "/admin/matches?status=" + status;
+    }
+}
+</script>
+
+</body>
+</html>

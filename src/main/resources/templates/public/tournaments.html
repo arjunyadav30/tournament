@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournaments | CricketPro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); color: white; font-family: 'Poppins', sans-serif; min-height: 100vh; }
+        .navbar { background: rgba(255,255,255,0.05) !important; backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .navbar-brand { font-weight: 700; color: #00ffcc !important; font-size: 22px; }
+        .nav-link { color: rgba(255,255,255,0.8) !important; font-weight: 500; }
+        .nav-link:hover, .nav-link.active { color: #00ffcc !important; }
+        .page-header { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; backdrop-filter: blur(10px); padding: 30px; margin-bottom: 30px; text-align: center; }
+        .tournament-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; backdrop-filter: blur(10px); padding: 24px; margin-bottom: 20px; transition: 0.3s; }
+        .tournament-card:hover { transform: translateY(-5px); border-color: #00ffcc; box-shadow: 0 10px 30px rgba(0,255,204,0.2); }
+        .tournament-name { font-size: 24px; font-weight: 700; color: #00ffcc; margin-bottom: 12px; }
+        .tournament-info { color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 8px; }
+        .badge-status { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; margin-top: 8px; }
+        .badge-upcoming { background: rgba(255,210,0,0.2); color: #ffd200; border: 1px solid #ffd200; }
+        .badge-ongoing { background: rgba(255,65,108,0.2); color: #ff416c; border: 1px solid #ff416c; }
+        .badge-completed { background: rgba(86,171,47,0.2); color: #56ab2f; border: 1px solid #56ab2f; }
+        .btn-view { background: linear-gradient(45deg, #00ffcc, #00c3ff); border: none; color: black; font-weight: 700; padding: 10px 24px; border-radius: 12px; margin-top: 16px; text-decoration: none; display: inline-block; transition: 0.3s; }
+        .btn-view:hover { opacity: 0.9; transform: translateY(-2px); color: black; }
+        .empty-state { text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.5); }
+        @media (max-width: 768px) {
+            .tournament-card { padding: 18px; }
+            .tournament-name { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand" href="/">🏏 CricketPro</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto text-center">
+                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="/tournaments">Tournaments</a></li>
+                <li class="nav-item"><a class="nav-link" href="/matches">Matches</a></li>
+                <li class="nav-item"><a class="nav-link" href="/teams">Teams</a></li>
+                <li class="nav-item"><a class="nav-link" href="/players">Players</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/login">Admin</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="fw-bold mb-2">🏆 Cricket Tournaments</h1>
+        <p class="text-white-50 mb-0">Explore all cricket tournaments, teams, and matches</p>
+    </div>
+
+    <!-- Tournaments Grid -->
+    <div class="row g-4">
+        <div class="col-12 col-md-6 col-lg-4" th:each="tournament : ${tournaments}">
+            <div class="tournament-card">
+                <div class="tournament-name" th:text="${tournament.tournamentName}">Tournament Name</div>
+                
+                <div class="tournament-info" th:if="${tournament.location != null}">
+                    📍 <span th:text="${tournament.location}">Location</span>
+                </div>
+                
+                <div class="tournament-info">
+                    📅 <span th:text="${tournament.startDate != null ? tournament.startDate : 'TBD'}">Start Date</span>
+                    <span th:if="${tournament.endDate != null}" th:text="' - ' + ${tournament.endDate}"> - End Date</span>
+                </div>
+                
+                <div class="tournament-info" th:if="${tournament.organizer != null}">
+                    🎯 <span th:text="${tournament.organizer}">Organizer</span>
+                </div>
+                
+                <div>
+                    <span class="badge-status"
+                          th:classappend="${tournament.status == 'Upcoming'} ? 'badge-upcoming' : (${tournament.status == 'Ongoing'} ? 'badge-ongoing' : 'badge-completed')"
+                          th:text="${tournament.status != null ? tournament.status : 'Upcoming'}">Upcoming</span>
+                </div>
+                
+                <a th:href="@{/tournament/{id}(id=${tournament.tournamentId})}" class="btn btn-view">
+                    View Details →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div th:if="${tournaments == null or tournaments.size() == 0}" class="empty-state">
+        <h3>📭 No Tournaments Found</h3>
+        <p>Check back later for upcoming tournaments</p>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

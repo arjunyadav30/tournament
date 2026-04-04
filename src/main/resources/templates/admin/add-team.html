@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Team | NPL Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 🔥 GLOBAL STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 🔥 NAVBAR */
+        .navbar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            background: linear-gradient(45deg, #00ffcc, #00c3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            letter-spacing: 1px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #00ffcc;
+            color: #00ffcc;
+        }
+
+        /* 🔥 FORM CONTAINER */
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .form-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .form-card h2 {
+            font-size: 26px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #00ffcc;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        }
+
+        /* 🔥 FORM FIELDS */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+            margin-left: 5px;
+        }
+
+        input, select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 14px 18px;
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        select option {
+            background: #1c333b;
+            color: white;
+        }
+
+        input:focus, select:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #00ffcc;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+        }
+
+        /* 🔥 BUTTON */
+        button {
+            background: linear-gradient(45deg, #00ffcc, #00c3ff);
+            color: #000;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.4s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 204, 0.4);
+            filter: brightness(1.1);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            .form-card { padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="javascript:history.back()" class="back-btn">← Back</a>
+    <h2>🏆 NPL TEAM REGISTRATION</h2>
+    <div style="width:60px;"></div>
+</nav>
+
+<div class="container">
+
+    <div class="form-card">
+        <h2>Add New Team</h2>
+
+        <div th:if="${error}" style="background:rgba(255,100,100,0.15);border:1px solid #ff6464;padding:10px 16px;border-radius:10px;color:#ff9999;margin-bottom:16px;">
+            ⚠️ <span th:text="${error}"></span>
+        </div>
+
+        <input type="hidden" name="tournamentId" id="hiddenTournamentId" th:value="${selectedTournamentId ?: ''}">
+
+        <form action="/admin/teams/add" method="post">
+
+            <div class="input-group">
+                <label>Team Name</label>
+                <input type="text" name="teamName" placeholder="e.g. Netyakhedi Supergiants" required>
+            </div>
+
+            <div class="input-group">
+                <label>Captain Name</label>
+                <input type="text" name="captainName" placeholder="Enter captain name">
+            </div>
+
+            <div class="input-group">
+                <label>Village / City</label>
+                <input type="text" name="village" placeholder="Enter location">
+            </div>
+
+            <div class="input-group">
+                <label>Tournament (Optional)</label>
+                <select name="tournamentId">
+                    <option value="">-- Select Tournament --</option>
+                    <option th:each="tournament : ${tournaments}"
+                            th:value="${tournament.tournamentId}"
+                            th:text="${tournament.tournamentName}"
+                            th:selected="${selectedTournamentId != null and selectedTournamentId == tournament.tournamentId}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Participation Status</label>
+                <select name="status">
+                    <option value="Active">🟢 Active</option>
+                    <option value="Inactive">🔴 Inactive</option>
+                </select>
+            </div>
+
+            <button type="submit">Register Team</button>
+
+        </form>
+    </div>
+
+</div>
+
+</body>
+</html>

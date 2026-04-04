@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Sky -->
+  <rect x="0" y="0" width="32" height="20" rx="2" fill="#87CEEB"/>
+  <!-- Green ground -->
+  <rect x="0" y="20" width="32" height="12" rx="2" fill="#2d7a2d"/>
+  <!-- Pitch -->
+  <rect x="12" y="14" width="8" height="7" fill="#c8b878"/>
+  <!-- Wickets -->
+  <rect x="13.5" y="10" width="1" height="7" fill="#8B4513"/>
+  <rect x="15.5" y="10" width="1" height="7" fill="#8B4513"/>
+  <rect x="17.5" y="10" width="1" height="7" fill="#8B4513"/>
+  <!-- Bails -->
+  <rect x="13.2" y="9.5" width="5.6" height="1" rx="0.5" fill="#8B4513"/>
+  <!-- Cricket Ball -->
+  <circle cx="24" cy="13" r="3" fill="#cc2200"/>
+  <path d="M22 12 Q24 10 26 12" stroke="white" stroke-width="0.5" fill="none"/>
+  <path d="M22 14 Q24 16 26 14" stroke="white" stroke-width="0.5" fill="none"/>
+  <!-- Bat -->
+  <rect x="6" y="11" width="2.5" height="8" rx="0.5" fill="#D2A679"/>
+  <rect x="6.5" y="8.5" width="1.5" height="3" rx="0.3" fill="#b8864e"/>
+  <!-- Tree -->
+  <circle cx="4" cy="9" r="3" fill="#228B22"/>
+  <rect x="3.3" y="12" width="1.4" height="3" fill="#5C4033"/>
+  <!-- Sun -->
+  <circle cx="27" cy="4" r="2.5" fill="#FFD700"/>
+</svg>

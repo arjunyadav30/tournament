@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - CricketPro</title>
+    <link rel="stylesheet" th:href="@{/auth.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Create Account 🎉</h2>
+            <p>Join CricketPro and start managing tournaments</p>
+        </div>
+
+        <!-- BUG FIX: show error/success messages from redirect params -->
+        <div th:if="${param.error != null}" style="background:#ffe0e0;border:1px solid #e74c3c;border-radius:8px;padding:10px 14px;margin-bottom:16px;color:#c0392b;font-size:14px;">
+            <span th:if="${param.error == 'email_exists'}">⚠️ This email is already registered. Please <a href="/login" style="color:#c0392b;font-weight:600;">login</a> instead.</span>
+            <span th:unless="${param.error == 'email_exists'}">⚠️ Registration failed. Please try again.</span>
+        </div>
+
+        <form action="/signup" method="post" class="auth-form">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">👤</span>
+                    <input type="text" id="name" name="name" placeholder="Enter your full name" required autocomplete="name">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">📧</span>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required autocomplete="email">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="password" name="password" placeholder="Create a strong password" required autocomplete="new-password">
+                </div>
+                <div class="password-strength">
+                    <div class="strength-bar"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="role">Select Role</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🎯</span>
+                    <select id="role" name="role" required>
+                        <option value="">Choose your role</option>
+                        <option value="ADMIN">Admin - Manage tournaments and teams</option>
+                        <option value="SCORER">Scorer - Update live scores</option>
+                        <option value="VIEWER">Viewer - Watch matches</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-options">
+                <label class="checkbox-label">
+                    <input type="checkbox" required>
+                    <span>I agree to the Terms & Conditions</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <span>Create Account</span>
+                <span class="btn-icon">→</span>
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Already have an account? <a href="/login">Login here</a></p>
+        </div>
+
+        <div class="back-link">
+            <a href="/">← Back to Home</a>
+        </div>
+    </div>
+
+    <div class="auth-illustration">
+        <div class="illustration-content">
+            <h1>🏏 CricketPro</h1>
+            <p>Join the ultimate cricket tournament platform</p>
+            <div class="benefits-list">
+                <div class="benefit-item">
+                    <div class="benefit-icon">⚡</div>
+                    <div>
+                        <h4>Live Scoring</h4>
+                        <p>Real-time ball-by-ball updates</p>
+                    </div>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">📊</div>
+                    <div>
+                        <h4>Detailed Stats</h4>
+                        <p>Comprehensive player analytics</p>
+                    </div>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">🏆</div>
+                    <div>
+                        <h4>Tournament Management</h4>
+                        <p>Complete control over matches</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
