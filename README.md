@@ -1,4 +1,4 @@
 # tournament
-project contributors
-Arjun Yadav
-Prachi Ahirwar
+project contributors\n
+Arjun Yadav\n
+Prachi Ahirwar\n
