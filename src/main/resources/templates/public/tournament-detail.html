@@ -399,26 +399,7 @@
     </div>
 
     <div class="category-grid">
-        <div class="category-card">
-            <div class="category-title">
-                <div>
-                    <div class="category-name">Most Runs</div>
-                    <div class="category-subtitle">Top run-scorers in this tournament</div>
-                </div>
-                <div class="category-value" th:text="${statsMostRuns.size() > 0 ? statsMostRuns[0].value : '—'}">0</div>
-            </div>
-            <div class="rank-list">
-                <div class="rank-item" th:each="stat,iter : ${statsMostRuns}" th:classappend="${iter.index == 0} ? ' first'">
-                    <div class="rank-badge" th:text="${iter.index + 1}">1</div>
-                    <div>
-                        <div class="rank-player" th:text="${stat.playerName}">Player</div>
-                        <div class="rank-team" th:text="${stat.teamName}">Team</div>
-                    </div>
-                    <div class="rank-value" th:text="${stat.value}">0</div>
-                </div>
-                <div class="empty-mini" th:if="${statsMostRuns.empty}"><span>📊</span>No batting stats available</div>
-            </div>
-        </div>
+        
 
         <div class="category-card">
             <div class="category-title">
