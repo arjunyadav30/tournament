@@ -1,4 +1,4 @@
-package com.example.Tournament.controller;
+     package com.example.Tournament.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
