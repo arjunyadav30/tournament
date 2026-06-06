@@ -2,18 +2,24 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Register with Mobile</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" th:href="@{/auth.css}">
+    <style>body{background:white;color:black}</style>
 </head>
 <body>
-<h2>Player Registration</h2>
-<div th:if="${param.error}">
-    <p th:text="${param.error}"></p>
+<div class="container">
+    <h2>Player Registration</h2>
+    <div th:if="${param.error}">
+        <p th:text="${param.error}"></p>
+    </div>
+    <form action="/public/register" method="post" class="auth-form">
+        <label>Name: <input type="text" name="playerName" required/></label><br/>
+        <label>Mobile: <input type="text" name="mobile" pattern="[0-9]{10,15}" th:value="${mobile}" required/></label><br/>
+        <button type="submit">Register</button>
+    </form>
+    <p>Or <a href="/public/otp">Login with OTP</a></p>
 </div>
-<form action="/public/register" method="post">
-    <label>Name: <input type="text" name="playerName" required/></label><br/>
-    <label>Mobile: <input type="text" name="mobile" pattern="[0-9]{10,15}" th:value="${mobile}" required/></label><br/>
-    <button type="submit">Register</button>
-</form>
-<p>Or <a href="/public/otp">Login with OTP</a></p>
 </body>
 </html>
