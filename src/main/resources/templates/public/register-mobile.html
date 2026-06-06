@@ -11,7 +11,7 @@
 </div>
 <form action="/public/register" method="post">
     <label>Name: <input type="text" name="playerName" required/></label><br/>
-    <label>Mobile: <input type="text" name="mobile" pattern="\\d{10,15}" th:value="${mobile}" required/></label><br/>
+    <label>Mobile: <input type="text" name="mobile" pattern="[0-9]{10,15}" th:value="${mobile}" required/></label><br/>
     <button type="submit">Register</button>
 </form>
 <p>Or <a href="/public/otp">Login with OTP</a></p>

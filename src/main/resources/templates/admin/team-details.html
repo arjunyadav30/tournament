@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title th:text="${team.teamName} + ' | Admin'">Team Details</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" th:href="@{/admin.css}">
 </head>
 <body>
 <h1 th:text="${team.teamName}">Team Name</h1>
@@ -28,7 +30,7 @@
     <input type="text" id="playerName" name="playerName" required />
     <br/>
     <label for="mobile">Mobile:</label>
-    <input type="text" id="mobile" name="mobile" pattern="\\d{10,15}" title="10-15 digits" required />
+    <input type="text" id="mobile" name="mobile" pattern="[0-9]{10,15}" title="10-15 digits" required />
     <span id="mobileStatus" style="margin-left:8px;color:#666;font-size:13px;"></span>
     <input type="hidden" id="existingPlayerId" name="existingPlayerId" />
     <br/>
