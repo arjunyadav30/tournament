@@ -217,6 +217,7 @@ public class TeamController {
     public String addPlayerToTeam(@PathVariable int teamId,
                                   @RequestParam String playerName,
                                   @RequestParam String mobile,
+                                  @RequestParam(required = false) Integer existingPlayerId,
                                   RedirectAttributes ra) {
 
         Team team = teamRepository.findById(teamId).orElse(null);
@@ -228,6 +229,25 @@ public class TeamController {
         String m = mobile == null ? "" : mobile.trim();
         if (!m.matches("\\d{10,15}")) {
             ra.addFlashAttribute("error", "Invalid mobile number. Use 10-15 digits.");
+            return "redirect:/admin/teams/" + teamId + "/detail";
+        }
+
+        if (existingPlayerId != null && existingPlayerId > 0) {
+            Player existing = playerRepository.findById(existingPlayerId).orElse(null);
+            if (existing != null) {
+                existing.setTeam(team);
+                playerRepository.save(existing);
+                ra.addFlashAttribute("success", "Existing player added to team");
+                return "redirect:/admin/teams/" + teamId + "/detail";
+            }
+        }
+
+        Player byMobile = playerRepository.findByMobileNumber(m);
+        if (byMobile != null) {
+            // attach existing mobile-registered player to team
+            byMobile.setTeam(team);
+            playerRepository.save(byMobile);
+            ra.addFlashAttribute("success", "Player already registered — added to team");
             return "redirect:/admin/teams/" + teamId + "/detail";
         }
 

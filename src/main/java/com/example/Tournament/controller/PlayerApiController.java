@@ -20,4 +20,18 @@ public class PlayerApiController {
     public List<Player> getPlayersByTeam(@PathVariable int teamId) {
         return playerRepository.findByTeam_TeamId(teamId);
     }
+
+    @GetMapping("/by-mobile")
+    public Object findByMobile(@RequestParam String mobile) {
+        String m = mobile == null ? "" : mobile.trim();
+        boolean valid = m.matches("\\d{10,15}");
+        Player p = null;
+        if (valid) p = playerRepository.findByMobileNumber(m);
+        return java.util.Map.of(
+                "valid", valid,
+                "found", p != null,
+                "playerId", p != null ? p.getPlayerId() : null,
+                "playerName", p != null ? p.getPlayerName() : null
+        );
+    }
 }

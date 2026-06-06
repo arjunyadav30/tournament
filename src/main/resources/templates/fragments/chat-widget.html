@@ -1,0 +1,73 @@
+<div id="chatWidget" style="position:fixed;right:16px;bottom:16px;width:320px;background:#fff;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.2);overflow:hidden;font-family:Poppins,Arial,Helvetica,sans-serif;z-index:9999;">
+    <div style="background:#203a43;color:#fff;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-weight:700">Live Chat</div>
+        <div style="font-size:12px;opacity:0.9">Global</div>
+    </div>
+    <div id="chatMessages" style="height:240px;overflow:auto;padding:8px;background:#fafafa"></div>
+    <form id="chatForm" style="display:flex;gap:8px;padding:8px;border-top:1px solid #eee;">
+        <input id="chatSender" type="text" placeholder="Your name" style="flex:0 0 90px;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+        <input id="chatInput" type="text" placeholder="Message" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+        <button type="submit" style="padding:8px 12px;background:#00c3ff;border:none;border-radius:6px;color:#000;font-weight:700;">Send</button>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script>
+(function(){
+    const chatMessages = document.getElementById('chatMessages');
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+    const chatSender = document.getElementById('chatSender');
+
+    let stompClient = null;
+
+    function connect() {
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function(frame) {
+            stompClient.subscribe('/topic/public', function(message) {
+                const m = JSON.parse(message.body);
+                appendMessage(m);
+            });
+            // load history
+            fetch('/chat/history').then(r=>r.json()).then(arr=>{
+                arr.forEach(appendMessage);
+            }).catch(()=>{});
+        });
+    }
+
+    function appendMessage(m) {
+        if(!m) return;
+        const d = new Date(m.timestamp || Date.now());
+        const el = document.createElement('div');
+        el.style.marginBottom='8px';
+        el.innerHTML = '<div style="font-size:12px;color:#666;">' + m.sender + ' <span style="font-size:10px;color:#999">' + d.toLocaleTimeString() + '</span></div>' +
+                       '<div style="padding:6px 8px;background:#fff;border-radius:6px;border:1px solid #eee;">'+escapeHtml(m.content)+'</div>';
+        chatMessages.appendChild(el);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function escapeHtml(unsafe) {
+        return unsafe
++            ? unsafe.replace(/[&<"'`=\/]/g, function(s) {
++                return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'})[s];
++            })
++            : '';
+    }
+
+    chatForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        const sender = chatSender.value.trim() || 'Guest';
+        const content = chatInput.value.trim();
+        if(!content) return;
+        const msg = { sender: sender, content: content, timestamp: Date.now() };
+        if(stompClient && stompClient.connected) {
+            stompClient.send('/app/chat.send', {}, JSON.stringify(msg));
+            chatInput.value = '';
+        }
+    });
+
+    connect();
+})();
+</script>

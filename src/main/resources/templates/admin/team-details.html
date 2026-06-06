@@ -23,16 +23,57 @@
 </table>
 
 <h2>Add Player to Team</h2>
-<form th:action="@{'/admin/teams/' + ${team.teamId} + '/players/add'}" method="post">
+<form id="addPlayerForm" th:action="@{'/admin/teams/' + ${team.teamId} + '/players/add'}" method="post">
     <label for="playerName">Name:</label>
     <input type="text" id="playerName" name="playerName" required />
     <br/>
     <label for="mobile">Mobile:</label>
     <input type="text" id="mobile" name="mobile" pattern="\\d{10,15}" title="10-15 digits" required />
+    <span id="mobileStatus" style="margin-left:8px;color:#666;font-size:13px;"></span>
+    <input type="hidden" id="existingPlayerId" name="existingPlayerId" />
     <br/>
     <button type="submit">Add Player</button>
 </form>
 
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const mobileIn = document.getElementById('mobile');
+    const status = document.getElementById('mobileStatus');
+    const nameIn = document.getElementById('playerName');
+    const existingId = document.getElementById('existingPlayerId');
+
+    let timeout = null;
+    mobileIn.addEventListener('input', function(){
+        clearTimeout(timeout);
+        status.textContent = '';
+        existingId.value = '';
+        timeout = setTimeout(()=> checkMobile(mobileIn.value), 600);
+    });
+
+    function checkMobile(mobile){
+        if(!mobile) return;
+        fetch('/api/players/by-mobile?mobile=' + encodeURIComponent(mobile))
+            .then(r=>r.json())
+            .then(j=>{
+                if(!j.valid){
+                    status.style.color='red'; status.textContent='Invalid format (10-15 digits)';
+                    return;
+                }
+                if(j.found){
+                    status.style.color='green'; status.textContent='Player exists: ' + j.playerName + ' (will attach)';
+                    existingId.value = j.playerId || '';
+                    nameIn.value = j.playerName || nameIn.value;
+                } else {
+                    status.style.color='blue'; status.textContent='Mobile valid — new player will be created';
+                }
+            }).catch(()=>{});
+    }
+});
+</script>
+
 <p><a th:href="@{/admin/teams}">Back to teams</a></p>
 </body>
 </html>
+
+<!-- Chat widget for admin pages -->
+<div th:insert="~{fragments/chat-widget.html}"></div>
