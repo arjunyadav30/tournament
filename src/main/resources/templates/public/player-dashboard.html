@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${player.playerName} + ' | Player'">Player Dashboard</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-container">
+        <h2 class="logo">🏏 CricketPro</h2>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/teams">Teams</a></li>
+            <li><a href="/players">Players</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container" style="padding:24px;">
+    <h1 th:text="${player.playerName}">Player Name</h1>
+    <p>Team: <span th:text="${player.team != null ? player.team.teamName : 'No Team'}"></span></p>
+    <p>Mobile: <span th:text="${player.mobileNumber != null ? player.mobileNumber : '-'}"></span></p>
+
+    <h2>Career Summary</h2>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;">
+        <div class="stat-card">
+            <div class="stat-value" th:text="${totalRuns}">0</div>
+            <div class="stat-label">Runs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" th:text="${totalWickets}">0</div>
+            <div class="stat-label">Wickets</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" th:text="${highestScore}">0</div>
+            <div class="stat-label">Highest</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" th:text="${fifties}">0</div>
+            <div class="stat-label">Fifties</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" th:text="${hundreds}">0</div>
+            <div class="stat-label">Hundreds</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" th:text="${battingAvg}">-</div>
+            <div class="stat-label">Batting Avg</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" th:text="${bowlingAvg}">-</div>
+            <div class="stat-label">Bowling Avg</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" th:text="${economy}">-</div>
+            <div class="stat-label">Economy</div>
+        </div>
+    </div>
+
+    <h2 style="margin-top:24px;">Match History</h2>
+    <table style="width:100%;border-collapse:collapse;">
+        <thead>
+            <tr>
+                <th>Match</th>
+                <th>Date</th>
+                <th>Innings</th>
+                <th>Runs</th>
+                <th>Balls</th>
+                <th>4s</th>
+                <th>6s</th>
+                <th>SR</th>
+                <th>Wickets</th>
+                <th>Runs Given</th>
+                <th>Overs</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="sc : ${scorecards}">
+                <td>
+                    <a th:href="@{'/match/' + ${sc.match.matchId}}" th:text="${matches[sc.match.matchId] != null ? matches[sc.match.matchId].team1.teamName + ' vs ' + matches[sc.match.matchId].team2.teamName : 'Match'}"></a>
+                </td>
+                <td th:text="${sc.match != null && sc.match.matchDate != null ? sc.match.matchDate : '-'}"></td>
+                <td th:text="${sc.innings}"></td>
+                <td th:text="${sc.runs}"></td>
+                <td th:text="${sc.balls}"></td>
+                <td th:text="${sc.fours}"></td>
+                <td th:text="${sc.sixes}"></td>
+                <td th:text="${sc.balls > 0 ? (sc.runs * 100.0 / sc.balls) : 0}"></td>
+                <td th:text="${sc.wickets}"></td>
+                <td th:text="${sc.runsGiven}"></td>
+                <td th:text="${sc.oversBowled}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p style="margin-top:20px;"><a href="/players">← Back to players</a></p>
+</div>
+</body>
+</html>

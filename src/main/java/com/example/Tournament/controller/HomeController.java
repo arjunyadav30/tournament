@@ -39,6 +39,7 @@ public class HomeController {
     @Autowired private TournamentRepository tournamentRepository;
     @Autowired private LiveScoreBroadcaster liveScoreBroadcaster;
 
+    @SuppressWarnings("unused")
     private static class PlayerAggregate {
         private final Player player;
         private int totalRuns;
@@ -126,6 +127,7 @@ public class HomeController {
         }
     }
 
+    @SuppressWarnings("unused")
     private static class StatSpot {
         private final String playerName;
         private final String teamName;

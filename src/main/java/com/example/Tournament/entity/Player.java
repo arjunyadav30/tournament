@@ -29,6 +29,8 @@ public class Player {
     private float economy;
     private int fifties;
     private int hundreds;
+    @Column(name = "mobile_number", unique = true)
+    private String mobileNumber;
 
     public int getPlayerId() { return playerId; }
     public void setPlayerId(int playerId) { this.playerId = playerId; }
@@ -65,4 +67,7 @@ public class Player {
 
     public int getHundreds() { return hundreds; }
     public void setHundreds(int hundreds) { this.hundreds = hundreds; }
+
+    public String getMobileNumber() { return mobileNumber; }
+    public void setMobileNumber(String mobileNumber) { this.mobileNumber = mobileNumber; }
 }

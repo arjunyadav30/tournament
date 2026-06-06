@@ -197,6 +197,58 @@ public class TeamController {
         return "redirect:/admin/teams";
     }
 
+    // ─ Add player to a team (Admin team-details page)
+    @GetMapping("/admin/teams/{teamId}/detail")
+    public String adminTeamDetail(@PathVariable int teamId, Model model, RedirectAttributes ra) {
+        Optional<Team> optionalTeam = teamRepository.findById(teamId);
+        if (optionalTeam.isEmpty()) {
+            ra.addFlashAttribute("error", "Team not found");
+            return "redirect:/admin/teams";
+        }
+        Team team = optionalTeam.get();
+        var players = playerRepository.findByTeam_TeamId(teamId);
+
+        model.addAttribute("team", team);
+        model.addAttribute("players", players);
+        return "admin/team-details";
+    }
+
+    @PostMapping("/admin/teams/{teamId}/players/add")
+    public String addPlayerToTeam(@PathVariable int teamId,
+                                  @RequestParam String playerName,
+                                  @RequestParam String mobile,
+                                  RedirectAttributes ra) {
+
+        Team team = teamRepository.findById(teamId).orElse(null);
+        if (team == null) {
+            ra.addFlashAttribute("error", "Invalid team");
+            return "redirect:/admin/teams";
+        }
+
+        String m = mobile == null ? "" : mobile.trim();
+        if (!m.matches("\\d{10,15}")) {
+            ra.addFlashAttribute("error", "Invalid mobile number. Use 10-15 digits.");
+            return "redirect:/admin/teams/" + teamId + "/detail";
+        }
+
+        Player p = new Player();
+        p.setPlayerName(playerName);
+        p.setMobileNumber(m);
+        p.setTeam(team);
+        p.setMatchesPlayed(0);
+        p.setTotalRuns(0);
+        p.setBallsPlayed(0);
+        p.setStrikeRate(0);
+        p.setTotalWickets(0);
+        p.setEconomy(0);
+        p.setFifties(0);
+        p.setHundreds(0);
+        playerRepository.save(p);
+
+        ra.addFlashAttribute("success", "Player added to team");
+        return "redirect:/admin/teams/" + teamId + "/detail";
+    }
+
     @GetMapping("/admin/teams/list")
     public String listTeams(Model model) {
         model.addAttribute("teams", teamRepository.findAll());

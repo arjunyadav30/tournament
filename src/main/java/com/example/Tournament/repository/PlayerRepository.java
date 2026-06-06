@@ -10,4 +10,6 @@ public interface PlayerRepository extends JpaRepository<Player, Integer> {
     // 🔥 Team ke hisaab se players nikalne ke liye
     List<Player> findByTeam_TeamId(int teamId);
 
+    Player findByMobileNumber(String mobileNumber);
+
 }

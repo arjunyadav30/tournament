@@ -45,7 +45,7 @@
                 <div class="player-header">
                     <div class="player-icon">👤</div>
                     <div class="player-basic">
-                        <h3 th:text="${player.playerName}">Player Name</h3>
+                        <h3><a th:href="@{'/player/' + ${player.playerId}}" th:text="${player.playerName}"></a></h3>
                         <span class="player-role" th:text="${player.role}">Role</span>
                     </div>
                 </div>

@@ -221,11 +221,14 @@ text-align:center;
             <p><b>Village:</b> <span th:text="${team.village}"></span></p>
             <p><b>Status:</b> <span th:text="${team.status}"></span></p>
 
-            <form th:action="@{'/admin/teams/delete/' + ${team.teamId}}" method="post"
-                  onsubmit="return confirm('⚠️ Team aur uske saare matches delete ho jayenge. Confirm?');">
+                        <div style="display:flex;gap:8px;margin-top:10px;">
+                                <a th:href="@{'/admin/teams/' + ${team.teamId} + '/detail'}" class="btn">🔍 View</a>
+                                <form th:action="@{'/admin/teams/delete/' + ${team.teamId}}" method="post"
+                                            onsubmit="return confirm('⚠️ Team aur uske saare matches delete ho jayenge. Confirm?');">
 
-                <button type="submit" class="delete-btn">🗑 Delete Team</button>
-            </form>
+                                        <button type="submit" class="delete-btn">🗑 Delete Team</button>
+                                </form>
+                        </div>
         </div>
     </div>
 

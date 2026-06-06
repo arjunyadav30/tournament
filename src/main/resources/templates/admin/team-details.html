@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${team.teamName} + ' | Admin'">Team Details</title>
+</head>
+<body>
+<h1 th:text="${team.teamName}">Team Name</h1>
+<p>Village: <span th:text="${team.village}"></span></p>
+<p>Captain: <span th:text="${team.captainName}"></span></p>
+
+<h2>Players</h2>
+<table>
+    <thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>Role</th></tr></thead>
+    <tbody>
+    <tr th:each="p : ${players}">
+        <td th:text="${p.playerId}"></td>
+        <td th:text="${p.playerName}"></td>
+        <td th:text="${p.mobileNumber}"></td>
+        <td th:text="${p.role}"></td>
+    </tr>
+    </tbody>
+</table>
+
+<h2>Add Player to Team</h2>
+<form th:action="@{'/admin/teams/' + ${team.teamId} + '/players/add'}" method="post">
+    <label for="playerName">Name:</label>
+    <input type="text" id="playerName" name="playerName" required />
+    <br/>
+    <label for="mobile">Mobile:</label>
+    <input type="text" id="mobile" name="mobile" pattern="\\d{10,15}" title="10-15 digits" required />
+    <br/>
+    <button type="submit">Add Player</button>
+</form>
+
+<p><a th:href="@{/admin/teams}">Back to teams</a></p>
+</body>
+</html>
